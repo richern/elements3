@@ -7,11 +7,12 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Point;
+import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.tiled.TiledMap;
 
-import physics.Body;
+import physics.Player;
 import world.Level;
 import world.World;
 
@@ -31,19 +32,7 @@ public class GameState extends BasicGameState {
 	public void update(GameContainer container, StateBasedGame sbg, int delta)
 			throws SlickException {
 		Input input = container.getInput();
-		Body player = world.getPlayer();
-		if(input.isKeyDown(Input.KEY_LEFT)) {
-			player.moveLeft(delta);
-		}
-		if(input.isKeyDown(Input.KEY_RIGHT)) {
-			player.moveRight(delta);
-		}
-		if(!input.isKeyDown(Input.KEY_LEFT) && !input.isKeyDown(Input.KEY_RIGHT)) {
-			player.idle(delta);
-		}
-		if(input.isKeyDown(Input.KEY_UP)) {
-			player.jump(delta);
-		}
+		transferInputToPlayer(input, world.getPlayer(), delta);
 		world.update(container, sbg, delta);
 	}
 	
@@ -60,8 +49,23 @@ public class GameState extends BasicGameState {
 	
 	public void initLevels() throws SlickException {
 		levels = new ArrayList<Level>();
-		Level ezpz = new Level("ezpz", new TiledMap("resources/tilemaps/ezpz.tmx"), new Point(64, 96));
+		Level ezpz = new Level("ezpz", new TiledMap("resources/tilemaps/ezpz.tmx"), new Point(100, 96));
 		levels.add(ezpz);
+	}
+	
+	public void transferInputToPlayer(Input input, Player player, int delta) {
+		if(input.isKeyDown(Input.KEY_LEFT)) {
+			player.moveLeft(delta);
+		}
+		if(input.isKeyDown(Input.KEY_RIGHT)) {
+			player.moveRight(delta);
+		}
+		if(!input.isKeyDown(Input.KEY_LEFT) && !input.isKeyDown(Input.KEY_RIGHT)) {
+			player.idle(delta);
+		}
+		if(input.isKeyDown(Input.KEY_UP)) {
+			player.jump(delta);
+		}
 	}
 	
 }
