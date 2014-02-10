@@ -10,8 +10,8 @@ public class Player {
 	
 	// The player can attempt to set its position, but ultimately the world will check and correct for collision
 	
-	private final float WIDTH = 21;
-	private final float HEIGHT = 21;
+	private final float WIDTH = 22;
+	private final float HEIGHT = 22;
 	
 	private final float MAX_SPEED = 600;
 	private final float ACCELERATION = 1200;
@@ -53,9 +53,6 @@ public class Player {
 		}
 		
 		gravity(time);
-		
-		x += dx * time;
-		y += dy * time;
 	}
 	
 	public void idle(float time) {
@@ -100,14 +97,6 @@ public class Player {
 		return HEIGHT;
 	}
 	
-	public void setX(float x) {
-		this.x = x;
-	}
-	
-	public void setY(float y) {
-		this.y = y;
-	}
-	
 	public Point getPosition() {
 		return new Point(x, y);
 	}
@@ -121,9 +110,17 @@ public class Player {
 		return new Vector2f(dx, dy);
 	}
 	
+	public void setDx(float dx) {
+		this.dx = dx;
+	}
+	
+	public void setDy(float dy) {
+		this.dy = dy;
+	}
+	
 	public Rectangle getRectangle() {
-		float topLeftX = x - (WIDTH - 1) / 2;
-		float topLeftY = y - (HEIGHT - 1) / 2;
+		float topLeftX = x - WIDTH / 2;
+		float topLeftY = y - HEIGHT / 2;
 		return new Rectangle(topLeftX, topLeftY, WIDTH, HEIGHT);
 	}
 	

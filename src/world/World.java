@@ -41,44 +41,88 @@ public class World {
 	
 	public void updatePlayerPosition(Input input, int delta) {
 		float time = delta / 1000.0f;
-		Point newPosition = checkCollision();
+		Point newPosition = checkCollision(time);
 		player.setPosition(newPosition);
 	}
 	
-	public Point checkCollision() {
-		float newX = player.getPosition().getX();
-		float newY = player.getPosition().getY();
+	public Point checkCollision(float time) {
 		CollisionMap tileMap = level.getTileMap();
-		int tileSize = tileMap.getTileSize();
-		Rectangle rect = player.getRectangle();
+		int tileSize = tileMap.getTileSize();		
 		
-		float minX = rect.getMinX();
-		float maxX = rect.getMaxX();
-		float minY = rect.getMinY();
-		float maxY = rect.getMaxY();
+		float width = player.getWidth();
+		float height = player.getHeight();
 		
-		Point topLeft = new Point(minX, minY);
-		Point topRight = new Point(maxX, minY);
-		Point bottomLeft = new Point(minX, maxY);
-		Point bottomRight = new Point(maxX, maxY);
+		float oldX = player.getPosition().getX();
+		float oldY = player.getPosition().getY();
 		
-		boolean isTopLeftBlocked = tileMap.isBlocked(topLeft);
-		boolean isTopRightBlocked = tileMap.isBlocked(topRight);
-		boolean isBottomLeftBlocked = tileMap.isBlocked(bottomLeft);
-		boolean isBottomRightBlocked = tileMap.isBlocked(bottomRight);
+		float velocityX = player.getVelocity().getX();
+		float velocityY = player.getVelocity().getY();
 		
-		boolean isTopBlocked = isTopLeftBlocked || isTopRightBlocked;
-		boolean isRightBlocked = isTopRightBlocked || isBottomRightBlocked;
-		boolean isBottomBlocked = isBottomLeftBlocked || isBottomRightBlocked;
-		boolean isLeftBlocked = isTopLeftBlocked || isBottomLeftBlocked;
+		float newX = oldX + velocityX * time;
+		float newY = oldY + velocityY * time;
 		
-		if(isBottomBlocked) {
-			newY = ((int) maxY / tileSize) * tileSize - player.getHeight() / 2 - 1;
+		float finalX;
+		float finalY;
+				
+		// have to compare x and y directions separately
+		finalY = newY;
+		
+		float oldTopY = oldY - height / 2;
+		float oldBottomY = oldY + height / 2;
+		
+		if(velocityX < 0) {
+			float leftX = newX - width / 2;
+			
+			Point topLeft = new Point(leftX, oldTopY);
+			Point bottomLeft = new Point(leftX, oldBottomY);
+			
+			boolean leftBlocked = tileMap.isBlocked(topLeft) || tileMap.isBlocked(bottomLeft);
+			if(leftBlocked) {
+				finalX = ((int) leftX / tileSize) * tileSize + tileSize + player.getWidth() / 2 + 1;
+				player.setDx(0);
+			}
+			else {
+				finalX = newX;
+			}
 		}
-		if(isTopLeftBlocked) {
-			newX = ((int) minX / tileSize) * tileSize + tileSize + player.getWidth() / 2;
+		else if(velocityX > 0) {
+			float rightX = newX + width / 2;
+			
+			Point topRight = new Point(rightX, oldTopY);
+			Point bottomRight = new Point(rightX, oldBottomY);
+			
+			boolean rightBlocked = tileMap.isBlocked(topRight) || tileMap.isBlocked(bottomRight);
+			if(rightBlocked) {
+				finalX = ((int) rightX / tileSize) * tileSize - player.getWidth() / 2;
+				player.setDx(0);
+			}
+			else {
+				finalX = newX;
+			}
+		}
+		else {
+			finalX = newX;
 		}
 		
-		return new Point(newX, newY);
+		float oldLeftX = oldX - width / 2;
+		float oldRightX = oldX + width / 2 - 1;
+		if(velocityY > 0) {
+			float bottomY = newY + height / 2;
+			
+			Point bottomLeft = new Point(oldLeftX, bottomY);
+			Point bottomRight = new Point(oldRightX, bottomY);
+			
+			boolean bottomBlocked = tileMap.isBlocked(bottomLeft) || tileMap.isBlocked(bottomRight);
+			if(bottomBlocked) {
+				finalY = ((int) bottomY / tileSize) * tileSize - player.getHeight() / 2 - 1;
+				player.setDy(0);
+			}
+			else {
+				finalY = newY;
+			}
+		}
+	
+		return new Point(finalX, finalY);
 	}
+	
 }
