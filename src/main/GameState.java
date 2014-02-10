@@ -13,33 +13,36 @@ import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.tiled.TiledMap;
 
 import physics.Player;
+import world.CollisionMap;
 import world.Level;
 import world.World;
 
 public class GameState extends BasicGameState {
 	
-	private World world;
 	private ArrayList<Level> levels;
+	private World world;
+	private Player player;
 
 	@Override
 	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
-		initLevels();
-		world = new World(levels.get(0));
+		this.levels = initLevels();
+		this.world = new World(levels.get(0));
+		this.player = world.getPlayer();
 	}
 
 	@Override
 	public void update(GameContainer container, StateBasedGame sbg, int delta)
 			throws SlickException {
 		Input input = container.getInput();
-		transferInputToPlayer(input, world.getPlayer(), delta);
-		world.update(container, sbg, delta);
+		player.update(input, delta);
+		world.update(input, delta);
 	}
 	
 	@Override
 	public void render(GameContainer container, StateBasedGame sbg, Graphics graphics)
 			throws SlickException {
-		world.render(container, sbg, graphics);
+		world.render(graphics);
 	}
 
 	@Override
@@ -47,25 +50,13 @@ public class GameState extends BasicGameState {
 		return 0;
 	}
 	
-	public void initLevels() throws SlickException {
-		levels = new ArrayList<Level>();
-		Level ezpz = new Level("ezpz", new TiledMap("resources/tilemaps/ezpz.tmx"), new Point(100, 96));
+	public ArrayList<Level> initLevels() throws SlickException {
+		ArrayList<Level> levels = new ArrayList<Level>();
+		
+		Level ezpz = new Level("ezpz", new CollisionMap("resources/tilemaps/ezpz.tmx"), new Point(100, 50));
 		levels.add(ezpz);
-	}
-	
-	public void transferInputToPlayer(Input input, Player player, int delta) {
-		if(input.isKeyDown(Input.KEY_LEFT)) {
-			player.moveLeft(delta);
-		}
-		if(input.isKeyDown(Input.KEY_RIGHT)) {
-			player.moveRight(delta);
-		}
-		if(!input.isKeyDown(Input.KEY_LEFT) && !input.isKeyDown(Input.KEY_RIGHT)) {
-			player.idle(delta);
-		}
-		if(input.isKeyDown(Input.KEY_UP)) {
-			player.jump(delta);
-		}
+		
+		return levels;
 	}
 	
 }
