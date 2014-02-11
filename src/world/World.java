@@ -116,6 +116,22 @@ public class World {
 			if(bottomBlocked) {
 				finalY = ((int) bottomY / tileSize) * tileSize - player.getHeight() / 2 - 1;
 				player.setDy(0);
+				player.restoreJump();
+			}
+			else {
+				finalY = newY;
+			}
+		}
+		else if(velocityY < 0) {
+			float topY = newY - height / 2;
+			
+			Point topLeft = new Point(oldLeftX, topY);
+			Point topRight = new Point(oldRightX, topY);
+			
+			boolean topBlocked = tileMap.isBlocked(topLeft) || tileMap.isBlocked(topRight);
+			if(topBlocked) {
+				finalY = ((int) topY / tileSize) * tileSize + tileSize + player.getHeight() / 2;
+				player.setDy(0);
 			}
 			else {
 				finalY = newY;

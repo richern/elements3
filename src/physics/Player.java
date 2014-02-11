@@ -15,11 +15,12 @@ public class Player {
 	
 	private final float MAX_SPEED = 600;
 	private final float ACCELERATION = 1200;
-	private final float GRAVITY = 1000;
+	private final float GRAVITY = 2000;
 	private final float MAX_FALL_SPEED = 1000;
 	
-	private final float JUMP_IMPULSE = 800;
-	private final float MAX_JUMP_TIME = 1000;
+	private final float JUMP_SPEED = 400;
+	private final float MIN_JUMP_TIME = 50;
+	private final float MAX_JUMP_TIME = 150;
 	
 	private float x;
 	private float y;
@@ -27,30 +28,34 @@ public class Player {
 	private float dy;
 	
 	private boolean hasJump;
+	private boolean jumping;
+	private boolean jumpReleased;
+	private float jumpTime;
 	
 	public Player(Point position) {
 		this.x = position.getX();
 		this.y = position.getY();
 		this.dx = 0;
 		this.dy = 0;
+		
 		this.hasJump = true;
+		this.jumping = false;
+		this.jumpReleased = true;
+		this.jumpTime = 0;
 	}
 	
 	public void update(Input input, int delta) {
 		float time = delta / 1000.0f;
 		
-		if(input.isKeyDown(Input.KEY_LEFT)) {
-			moveLeft(time);
-		}
-		if(input.isKeyDown(Input.KEY_RIGHT)) {
-			moveRight(time);
-		}
-		if(!input.isKeyDown(Input.KEY_LEFT) && !input.isKeyDown(Input.KEY_RIGHT)) {
-			idle(time);
-		}
-		if(input.isKeyDown(Input.KEY_UP)) {
-			jump(time);
-		}
+		boolean left = input.isKeyDown(Input.KEY_LEFT);
+		boolean right = input.isKeyDown(Input.KEY_RIGHT);
+		boolean up = input.isKeyDown(Input.KEY_UP);
+		
+		if(left && right || !left && !right) idle(time);
+		if(left) moveLeft(time);
+		if(right) moveRight(time);
+		if(up) jump(time);
+		if(!up) notJumping(time);
 		
 		gravity(time);
 	}
@@ -79,7 +84,48 @@ public class Player {
 		dx = newdx;
 	}
 	
+	/*public void jump(float time) {
+		if(jumpTime > MAX_JUMP_TIME) {
+			hasJump = false;
+			jumping = false;
+		}
+		if(hasJump) {
+			dy = -JUMP_SPEED;
+			jumpTime += time * 1000.0f;
+			jumping = true;
+		}
+	}
+	
+	public void notJumping(float time) {
+		if(jumping && jumpTime < MIN_JUMP_TIME) {
+			dy = -JUMP_SPEED;
+			jumpTime += time * 1000.0f; 
+		}
+		else {
+			jumping = false;
+		}
+	}*/
+	
 	public void jump(float time) {
+		if(hasJump && jumpReleased) {
+			dy = -JUMP_SPEED;
+			jumpReleased = false;
+			hasJump = false;
+			jumping = true;
+		}
+		if(jumping) {
+			if(jumpTime > MAX_JUMP_TIME) {
+				jumping = false;
+			}
+			else {
+				dy = -JUMP_SPEED;
+				jumpTime += time * 1000.0f;
+			}
+		}
+	}
+	
+	public void notJumping(float time) {
+		jumpReleased = true;
 	}
 	
 	public void gravity(float time) {
@@ -122,6 +168,11 @@ public class Player {
 		float topLeftX = x - WIDTH / 2;
 		float topLeftY = y - HEIGHT / 2;
 		return new Rectangle(topLeftX, topLeftY, WIDTH, HEIGHT);
+	}
+	
+	public void restoreJump() {
+		hasJump = true;
+		jumpTime = 0;
 	}
 	
 }
