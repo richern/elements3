@@ -1,4 +1,4 @@
-package physics;
+package world;
 
 import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Point;
@@ -32,6 +32,8 @@ public class Player {
 	private boolean jumpReleased;
 	private float jumpTime;
 	
+	private PlayerState state;
+	
 	public Player(Point position) {
 		this.x = position.getX();
 		this.y = position.getY();
@@ -42,6 +44,8 @@ public class Player {
 		this.jumping = false;
 		this.jumpReleased = true;
 		this.jumpTime = 0;
+		
+		this.state = PlayerState.INIT;
 	}
 	
 	public void update(Input input, int delta) {
@@ -49,7 +53,7 @@ public class Player {
 		
 		boolean left = input.isKeyDown(Input.KEY_LEFT);
 		boolean right = input.isKeyDown(Input.KEY_RIGHT);
-		boolean up = input.isKeyDown(Input.KEY_UP);
+		boolean up = input.isKeyDown(Input.KEY_UP) || input.isKeyDown(Input.KEY_SPACE);
 		
 		if(left && right || !left && !right) idle(time);
 		if(left) moveLeft(time);
@@ -58,6 +62,7 @@ public class Player {
 		if(!up) notJumping(time);
 		
 		gravity(time);
+		System.out.println(state);
 	}
 	
 	public void idle(float time) {
@@ -84,28 +89,6 @@ public class Player {
 		dx = newdx;
 	}
 	
-	/*public void jump(float time) {
-		if(jumpTime > MAX_JUMP_TIME) {
-			hasJump = false;
-			jumping = false;
-		}
-		if(hasJump) {
-			dy = -JUMP_SPEED;
-			jumpTime += time * 1000.0f;
-			jumping = true;
-		}
-	}
-	
-	public void notJumping(float time) {
-		if(jumping && jumpTime < MIN_JUMP_TIME) {
-			dy = -JUMP_SPEED;
-			jumpTime += time * 1000.0f; 
-		}
-		else {
-			jumping = false;
-		}
-	}*/
-	
 	public void jump(float time) {
 		if(hasJump && jumpReleased) {
 			dy = -JUMP_SPEED;
@@ -126,11 +109,15 @@ public class Player {
 	
 	public void notJumping(float time) {
 		jumpReleased = true;
+		jumping = false;
 	}
 	
 	public void gravity(float time) {
-		float newdy = dy + GRAVITY * time;
-		newdy = newdy > MAX_FALL_SPEED ? MAX_FALL_SPEED : newdy;
+		float gravity = state != PlayerState.WALL ? GRAVITY : GRAVITY / 1000;
+		float maxFallSpeed = state != PlayerState.WALL ? MAX_FALL_SPEED : MAX_FALL_SPEED / 1000;
+		
+		float newdy = dy + gravity * time;
+		newdy = newdy > maxFallSpeed ? maxFallSpeed : newdy;
 		dy = newdy;
 	}
 	
@@ -173,6 +160,10 @@ public class Player {
 	public void restoreJump() {
 		hasJump = true;
 		jumpTime = 0;
+	}
+	
+	public void setState(PlayerState state) {
+		this.state = state;
 	}
 	
 }

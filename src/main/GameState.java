@@ -13,9 +13,9 @@ import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.tiled.TiledMap;
 
-import physics.Player;
 import world.CollisionMap;
 import world.Level;
+import world.Player;
 import world.World;
 
 public class GameState extends BasicGameState {
@@ -28,7 +28,7 @@ public class GameState extends BasicGameState {
 	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
 		this.levels = initLevels();
-		this.world = new World(levels.get(0));
+		this.world = new World(levels.get(1));
 		this.player = world.getPlayer();
 	}
 
@@ -55,7 +55,9 @@ public class GameState extends BasicGameState {
 		ArrayList<Level> levels = new ArrayList<Level>();
 		
 		Level ezpz = new Level("ezpz", new CollisionMap("resources/tilemaps/ezpz.tmx"), new Point(100, 50));
+		Level wall_jump = new Level("wall_jump", new CollisionMap("resources/tilemaps/wall_jump.tmx"), new Point(300, 50));
 		levels.add(ezpz);
+		levels.add(wall_jump);
 		
 		return levels;
 	}
