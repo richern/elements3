@@ -15,12 +15,17 @@ public class Player {
 	
 	private final float MAX_SPEED = 600;
 	private final float ACCELERATION = 1200;
-	private final float GRAVITY = 2000;
+	private final float GRAVITY = 1500;
 	private final float MAX_FALL_SPEED = 1000;
 	
 	private final float JUMP_SPEED = 400;
 	private final float MIN_JUMP_TIME = 50;
 	private final float MAX_JUMP_TIME = 200;
+	
+	private final float MAX_WALL_TIME = 300;
+	private final float WALL_JUMP_SPEED = MAX_SPEED / 2;
+	private final float WALL_GRAVITY = GRAVITY / 3;
+	private final float WALL_SLIDE_SPEED = MAX_FALL_SPEED / 5;
 	
 	private float x;
 	private float y;
@@ -31,6 +36,7 @@ public class Player {
 	private boolean jumping;
 	private boolean jumpReleased;
 	private float jumpTime;
+	private float wallTime;
 	
 	private PlayerState state;
 	
@@ -44,6 +50,7 @@ public class Player {
 		this.jumping = false;
 		this.jumpReleased = false;
 		this.jumpTime = 0;
+		this.wallTime = 0;
 		
 		this.state = PlayerState.INIT;
 	}
@@ -60,7 +67,7 @@ public class Player {
 		if(right) moveRight(time);
 		if(up) jump(time);
 		if(!up) notJumping(time);
-		
+				
 		gravity(time);
 	}
 	
@@ -71,33 +78,47 @@ public class Player {
 	}
 
 	public void moveLeft(float time) {
-		float minVelocity = -MAX_SPEED;
-		float newdx = dx > 0 ? 0 : dx;
-		
-		newdx -= ACCELERATION * time;
-		newdx = newdx < minVelocity ? minVelocity : newdx;
-		
-		dx = newdx;
+		if(state == PlayerState.RIGHT_WALL && wallTime < MAX_WALL_TIME) {
+			wallTime += time * 1000.0f;
+			System.out.println(wallTime);
+		}
+		else {
+			wallTime = 0;
+			float minVelocity = -MAX_SPEED;
+			float newdx = dx > 0 && state == PlayerState.FLOOR ? 0 : dx;
+			
+			newdx -= ACCELERATION * time;
+			newdx = newdx < minVelocity ? minVelocity : newdx;
+			
+			dx = newdx;
+		}
 	}
 	
 	public void moveRight(float time) {
-		float maxVelocity = MAX_SPEED;
-		float newdx = dx < 0 ? 0 : dx;
-		
-		newdx += ACCELERATION * time;
-		newdx = newdx > maxVelocity ? maxVelocity : newdx;
-		
-		dx = newdx;
+		if(state == PlayerState.RIGHT_WALL && wallTime < MAX_WALL_TIME) {
+			wallTime += time * 1000.0f;
+			System.out.println(wallTime);
+		}
+		else {
+			wallTime = 0;
+			float maxVelocity = MAX_SPEED;
+			float newdx = dx < 0 && state == PlayerState.FLOOR ? 0 : dx;
+			
+			newdx += ACCELERATION * time;
+			newdx = newdx > maxVelocity ? maxVelocity : newdx;
+			
+			dx = newdx;
+		}
 	}
 	
 	public void jump(float time) {
 		if(hasJump && jumpReleased) {
 			dy = -JUMP_SPEED;
 			if(state == PlayerState.LEFT_WALL) {
-				dx = 1000;
+				dx = WALL_JUMP_SPEED;
 			}
 			else if(state == PlayerState.RIGHT_WALL) {
-				dx = -1000;
+				dx = -WALL_JUMP_SPEED;
 			}
 			jumpReleased = false;
 			hasJump = false;
@@ -121,8 +142,8 @@ public class Player {
 	
 	public void gravity(float time) {
 		boolean wall = state == PlayerState.LEFT_WALL || state == PlayerState.RIGHT_WALL;
-		float gravity = wall ? GRAVITY / 5: GRAVITY;
-		float maxFallSpeed = wall ? MAX_FALL_SPEED / 5: MAX_FALL_SPEED;
+		float gravity = wall ? WALL_GRAVITY : GRAVITY;
+		float maxFallSpeed = wall ? WALL_SLIDE_SPEED : MAX_FALL_SPEED;
 		
 		float newdy = dy + gravity * time;
 		newdy = newdy > maxFallSpeed ? maxFallSpeed : newdy;
@@ -166,8 +187,10 @@ public class Player {
 	}
 	
 	public void restoreJump() {
-		hasJump = true;
-		jumpTime = 0;
+		if(!jumping) {
+			hasJump = true;
+			jumpTime = 0;
+		}
 	}
 	
 	public void removeJump() {
