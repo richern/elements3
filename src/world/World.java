@@ -96,11 +96,21 @@ public class World {
 			finalY = newY;
 		}
 		
-		if(leftCollision != null && bottomCollision == null) {
-			player.setState(PlayerState.WALL);
+		// set player state to change physics based on state
+		if(bottomCollision != null){
+			player.setState(PlayerState.FLOOR);
+		}
+		else if(leftCollision != null) {
+			player.setState(PlayerState.LEFT_WALL);
+			player.restoreJump();
+		}
+		else if(rightCollision != null) {
+			player.setState(PlayerState.RIGHT_WALL);
+			player.restoreJump();
 		}
 		else {
-			player.setState(PlayerState.INIT);
+			player.setState(PlayerState.AIR);
+			player.removeJump();
 		}
 	
 		return new Point(finalX, finalY);
@@ -109,7 +119,7 @@ public class World {
 	public Float leftCollision(float velocityX, float newX, float oldY) {
 		if(velocityX > 0) return null;
 		
-		float leftX = newX - playerWidth / 2 - 1;
+		float leftX = newX - playerWidth / 2 - 2;
 		float topY = oldY - playerHeight / 2;
 		float bottomY = oldY + playerHeight / 2;
 		
@@ -153,7 +163,7 @@ public class World {
 		
 		float leftX = oldX - playerWidth / 2;
 		float rightX = oldX + playerWidth / 2 - 1;
-		float bottomY = newY + playerHeight / 2;
+		float bottomY = newY + playerHeight / 2 + 1;
 		
 		Point bottomLeft = new Point(leftX, bottomY);
 		Point bottomRight = new Point(rightX, bottomY);
