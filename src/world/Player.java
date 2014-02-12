@@ -165,5 +165,5 @@ public class Player {
 	public void setState(PlayerState state) {
 		this.state = state;
 	}
-	
+ 
 }
