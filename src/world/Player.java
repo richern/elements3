@@ -22,7 +22,7 @@ public class Player {
 	private final float MIN_JUMP_TIME = 50;
 	private final float MAX_JUMP_TIME = 200;
 	
-	private final float MAX_WALL_TIME = 300;
+	private final float MAX_WALL_TIME = 500;
 	private final float WALL_JUMP_SPEED = MAX_SPEED / 2;
 	private final float WALL_GRAVITY = GRAVITY / 3;
 	private final float WALL_SLIDE_SPEED = MAX_FALL_SPEED / 5;
@@ -57,7 +57,6 @@ public class Player {
 	
 	public void update(Input input, int delta) {
 		float time = delta / 1000.0f;
-		
 		boolean left = input.isKeyDown(Input.KEY_LEFT);
 		boolean right = input.isKeyDown(Input.KEY_RIGHT);
 		boolean up = input.isKeyDown(Input.KEY_UP) || input.isKeyDown(Input.KEY_SPACE);
@@ -80,7 +79,6 @@ public class Player {
 	public void moveLeft(float time) {
 		if(state == PlayerState.RIGHT_WALL && wallTime < MAX_WALL_TIME) {
 			wallTime += time * 1000.0f;
-			System.out.println(wallTime);
 		}
 		else {
 			wallTime = 0;
@@ -95,9 +93,8 @@ public class Player {
 	}
 	
 	public void moveRight(float time) {
-		if(state == PlayerState.RIGHT_WALL && wallTime < MAX_WALL_TIME) {
+		if(state == PlayerState.LEFT_WALL && wallTime < MAX_WALL_TIME) {
 			wallTime += time * 1000.0f;
-			System.out.println(wallTime);
 		}
 		else {
 			wallTime = 0;
