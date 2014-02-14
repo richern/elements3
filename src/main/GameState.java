@@ -28,7 +28,7 @@ public class GameState extends BasicGameState {
 	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
 		this.levels = initLevels();
-		this.world = new World(levels.get(1));
+		this.world = new World(levels.get(2));
 		this.player = world.getPlayer();
 	}
 
@@ -56,8 +56,10 @@ public class GameState extends BasicGameState {
 		
 		Level ezpz = new Level("ezpz", new CollisionMap("resources/tilemaps/ezpz.tmx"), new Point(100, 50));
 		Level wall_jump = new Level("wall_jump", new CollisionMap("resources/tilemaps/wall_jump.tmx"), new Point(300, 50));
+		Level plain = new Level("wall_jump", new CollisionMap("resources/tilemaps/plain.tmx"), new Point(40, 50));
 		levels.add(ezpz);
 		levels.add(wall_jump);
+		levels.add(plain);
 		
 		return levels;
 	}
