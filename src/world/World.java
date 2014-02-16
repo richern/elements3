@@ -22,6 +22,7 @@ public class World {
 	private int tileSize;
 	private float playerWidth;
 	private float playerHeight;
+	private Camera camera;
 	
  	public World(Level level) {
 		this.level = level;
@@ -30,14 +31,24 @@ public class World {
 		this.tileSize = level.getTileMap().getTileSize();
 		this.playerWidth = player.getWidth();
 		this.playerHeight = player.getHeight();
+		this.camera = new Camera(tileMap, player);
 	}
 	
 	public void update(Input input, int delta) {
+		player.update(input, delta);
 		updatePlayerPosition(input, delta);
+		camera.update();
 	}
 	 
 	public void render(Graphics graphics) {
-		level.getTileMap().render(0, 0);
+		int width = tileMap.getWidth();
+		int height = tileMap.getHeight();
+		int offsetX = (int) -camera.getX();
+		int offsetY = (int) -camera.getY();
+		int tilesX = offsetX / tileSize;
+		int tilesY = offsetY / tileSize;
+		level.getTileMap().render(offsetX, offsetY);
+		graphics.translate(offsetX, offsetY);
 		graphics.draw(player.getRectangle());
 	}
 	
@@ -64,8 +75,7 @@ public class World {
 		float finalX;
 		float finalY;
 				
-		// have to compare x and y directions separately		
-		
+		// have to compare x and y directions separately
 		Float leftCollision = leftCollision(velocityX, newX, oldY);
 		Float rightCollision = rightCollision(velocityX, newX, oldY);
 		Float bottomCollision = bottomCollision(velocityY, oldX, newY);
@@ -112,7 +122,8 @@ public class World {
 			player.setState(PlayerState.AIR);
 			player.removeJump();
 		}
-	
+		
+		player.setPositionChanged(oldX != finalX || oldY != finalY);
 		return new Point(finalX, finalY);
 	}
 	

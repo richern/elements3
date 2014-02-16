@@ -3,14 +3,18 @@ package world;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.tiled.TiledMap;
-
 public class CollisionMap extends TiledMap {
 	
 	private int tileSize;
 
-	public CollisionMap(String ref) throws SlickException {
+	public CollisionMap(String ref) throws SlickException, TileNotSquareException {
 		super(ref);
-		this.tileSize = getTileHeight();		
+		if(getTileHeight() != getTileWidth()) {
+			throw new TileNotSquareException();
+		}
+		else {
+			this.tileSize = getTileHeight();			
+		}
 	}
 	
 	public boolean isBlocked(Point p) {
@@ -26,4 +30,11 @@ public class CollisionMap extends TiledMap {
 		return tileSize;
 	}
 
+	@SuppressWarnings("serial")
+	public class TileNotSquareException extends Exception {
+		public TileNotSquareException() {
+			super("Tile height does not equal tile width");
+		}
+	}
+	
 }
