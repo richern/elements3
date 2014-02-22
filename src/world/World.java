@@ -41,13 +41,14 @@ public class World {
 	}
 	 
 	public void render(Graphics graphics) {
-		int width = tileMap.getWidth();
-		int height = tileMap.getHeight();
 		int offsetX = (int) -camera.getX();
 		int offsetY = (int) -camera.getY();
-		int tilesX = offsetX / tileSize;
-		int tilesY = offsetY / tileSize;
-		level.getTileMap().render(offsetX, offsetY);
+		int tileX = offsetX / tileSize - 1;
+		int tileY = offsetY / tileSize - 1;
+		int width = 100;
+		int height = 100;
+		
+		level.getTileMap().render(offsetX, offsetY, 0, 0, width, height);
 		graphics.translate(offsetX, offsetY);
 		graphics.draw(player.getRectangle());
 	}
