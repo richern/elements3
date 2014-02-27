@@ -1,10 +1,15 @@
 package world;
 
+import networking.GameRole;
+
 import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
+
+import states.PlayState;
+import util.GameInput;
 
 public class Player {
 	
@@ -66,18 +71,18 @@ public class Player {
 		
 		this.positionChanged = false;
 	}
-	
-	public void update(Input input, int delta) {
+
+	public void update(GameInput input, int delta) {
 		float time = delta / 1000.0f;
 		
 		isOnFloor = state == PlayerState.FLOOR;
 		isInAir = state == PlayerState.AIR;
 		isOnLeftWall = state == PlayerState.LEFT_WALL;
 		isOnRightWall = state == PlayerState.RIGHT_WALL;
-		
-		boolean left = input.isKeyDown(Input.KEY_LEFT);
-		boolean right = input.isKeyDown(Input.KEY_RIGHT);
-		boolean up = input.isKeyDown(Input.KEY_UP) || input.isKeyDown(Input.KEY_SPACE);
+
+		boolean left = input.left;
+		boolean right = input.right;
+		boolean up = input.up;
 		
 		if(left && right || !left && !right) idle(time);
 		if(left) moveLeft(time);

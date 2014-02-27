@@ -1,6 +1,8 @@
 package main;
 
 
+import java.io.IOException;
+
 import networking.GameClient;
 import networking.GameServer;
 
@@ -22,9 +24,9 @@ import world.CollisionMap.TileNotSquareException;
 
 public class Game extends StateBasedGame {
 	
-	private static final Dimension TARGET_RESOLUTION = new Dimension(1920, 1080);
-	
-	private static EndPoint endPoint;
+	static final Dimension TARGET_RESOLUTION = new Dimension(1920, 1080);
+	static GameServer server = null;
+	static GameClient client = null;
 	
 	public Game() {
 		super("Elements 3");
@@ -34,6 +36,7 @@ public class Game extends StateBasedGame {
 	public void initStatesList(GameContainer container) throws SlickException {
 		//container.getGraphics().scale(0.5f,0.5f);
 		addState(new MenuState());
+		addState(new LobbyState());
 		addState(new PlayState());
 	}
 	
@@ -41,8 +44,24 @@ public class Game extends StateBasedGame {
 		return TARGET_RESOLUTION;
 	}
 	
-	public static EndPoint getEndPoint() {
-		return endPoint;
+	public static void startServer() throws IOException {
+		server = new GameServer();
+	}
+	
+	public static GameServer getServer() {
+		return server;
+	}
+	
+	public static void setClient(GameClient c) {
+		client = c;
+	}
+	
+	public static GameClient getClient() {
+		return client;
+	}
+	
+	public static boolean isHost() {
+		return server != null;
 	}
 	
 	public static void main(String[] args) throws SlickException {

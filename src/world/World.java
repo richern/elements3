@@ -2,6 +2,8 @@ package world;
 
 import java.util.ArrayList;
 
+import networking.GameRole;
+
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
@@ -12,6 +14,8 @@ import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.tiled.TiledMap;
+
+import util.GameInput;
 
 public class World {
 	
@@ -34,9 +38,9 @@ public class World {
 		this.camera = new Camera(tileMap, player);
 	}
 	
-	public void update(Input input, int delta) {
+	public void update(GameInput input, int delta) {
 		player.update(input, delta);
-		updatePlayerPosition(input, delta);
+		correctPlayerPosition(delta);
 		camera.update();
 	}
 	 
@@ -57,7 +61,7 @@ public class World {
 		return player;
 	}
 	
-	public void updatePlayerPosition(Input input, int delta) {
+	public void correctPlayerPosition(int delta) {
 		float time = delta / 1000.0f;
 		Point newPosition = checkCollision(time);
 		player.setPosition(newPosition);
