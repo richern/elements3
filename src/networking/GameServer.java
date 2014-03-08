@@ -1,27 +1,32 @@
 package networking;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import networking.packets.GameStartPacket;
-import networking.packets.InputPacket;
-import networking.packets.RolePacket;
+import util.WorldInput;
+import main.Game;
+import networking.packets.*;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
+import enums.GameRole;
+import enums.GameState;
+
 public class GameServer extends Listener {
 	
-	private static Server server;
-	private static final int PORT = Network.PORT;
-	ArrayList<GameRole> roles = new ArrayList<GameRole>();
+	Game game;
+	Server server;
+	final int PORT = Network.PORT;
+	Map<GameRole, Integer> rolesToConnections = new HashMap<GameRole, Integer>();
+	WorldInput input = new WorldInput();
 	
-	public GameServer() throws IOException {
-		roles.add(GameRole.LEFT);
-		roles.add(GameRole.RIGHT);
-		roles.add(GameRole.JUMP);
-		server = new Server();
+	public GameServer(Game game) throws IOException {
+		initializeMap();
+		this.game = game;
+		this.server = new Server();
 		connect();
 	}
 	
@@ -33,25 +38,30 @@ public class GameServer extends Listener {
 		System.out.println("Server started on " + PORT);
 	}
 	
+	public void initializeMap() {
+		rolesToConnections.put(GameRole.LEFT, null);
+		rolesToConnections.put(GameRole.RIGHT, null);
+	}
+	
 	public void connected(Connection connection) {
-		RolePacket rolePacket = new RolePacket();
-		rolePacket.role = roles.remove(0);
-		connection.sendTCP(rolePacket);
-		if(roles.size() == 0) {
-			System.out.println("Sending GameStart packet");
-			server.sendToAllTCP(new GameStartPacket());
+		for(Map.Entry<GameRole, Integer> rtc : rolesToConnections.entrySet()) {
+			GameRole role = rtc.getKey();
+			Integer connectionId = rtc.getValue();
+			
+			if(connectionId == null) {
+				rolesToConnections.put(role, connectionId);
+				GameInitPacket gameInitPacket = new GameInitPacket();
+				gameInitPacket.role = role;
+				connection.sendTCP(gameInitPacket);
+			}
 		}
-		System.out.println("Connected: " + connection.getID());
 	}
 	
 	public void received(Connection connection, Object packet) {
-		int connectionId = connection.getID();
-		if(packet instanceof InputPacket) {
-			server.sendToAllExceptTCP(connectionId, packet);
-		}
 	}
 	
 	public void disconnected(Connection connection) {
+		
 		System.out.println("Disconnected: " + connection.getID());
 	}
 

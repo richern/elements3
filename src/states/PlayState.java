@@ -2,9 +2,6 @@ package states;
 
 import main.Game;
 import networking.GameClient;
-import networking.GameRole;
-import networking.packets.InputPacket;
-import networking.packets.TestPacket;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -14,35 +11,54 @@ import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
-import util.GameInput;
+import com.esotericsoftware.kryonet.Listener;
+
+import enums.GameRole;
+import enums.GameState;
+import util.PlayerInput;
+import util.WorldInput;
 import world.CollisionMap;
 import world.Level;
 import world.World;
 	
 public class PlayState extends BasicGameState {
 	
-	static World world;
-	public static GameRole role;
-	public static GameInput input;
+	World world;
+	GameRole role;
+	Listener network;
+	PlayerInput input;
 
 	@Override
 	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
-		input = new GameInput();
 		try {
-			setWorld(new Level("camera_test", new CollisionMap("resources/tilemaps/camera_test.tmx"), new Point(32, 576)));
+			world = new World(new Level("camera_test", new CollisionMap("resources/tilemaps/camera_test.tmx"), new Point(32, 576)));
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
+		network = ((Game) sbg).getNetwork();
+		input = new PlayerInput();
 	}
 
 	@Override
 	public void update(GameContainer container, StateBasedGame sbg, int delta)
 			throws SlickException {
-		input.registerInput(container.getInput());
-		if(role != GameRole.ALL) GameClient.sendInputPacket(input, delta);
-		world.update(input, delta);
+		Game game = (Game) sbg;
+		float time = delta / 1000.0f;
+		
+		if(game.isHost()) {
+			input.register(Input input);
+			world.update(input, time);
+		}
+		else if(game.isClient()) {
+			
+		}
+		else {
+			input.update(role, container.getInput());
+			world.update(input, time);
+		}
+		
 	}
 	
 	@Override
@@ -52,17 +68,13 @@ public class PlayState extends BasicGameState {
 		world.render(graphics);
 	}
 	
-	public static void setWorld(Level level) {
-		world = new World(level);
-	}
-	
-	public static World getWorld() {
-		return world;
-	}
-	
 	@Override
 	public int getID() {
 		return GameState.PlayState.getID();
+	}
+	
+	public void setRole(GameRole role) {
+		this.role = role;
 	}
 	
 }

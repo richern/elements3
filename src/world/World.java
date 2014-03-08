@@ -2,8 +2,6 @@ package world;
 
 import java.util.ArrayList;
 
-import networking.GameRole;
-
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
@@ -15,56 +13,45 @@ import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.tiled.TiledMap;
 
-import util.GameInput;
+import enums.GameRole;
+import enums.PlayerState;
+import util.WorldInput;
 
 public class World {
 	
 	// fields
-	private Level level;
-	private Player player;
 	private CollisionMap tileMap;
+	private Player player;
+	private Camera camera;
+	
+	// util
 	private int tileSize;
 	private float playerWidth;
 	private float playerHeight;
-	private Camera camera;
 	
  	public World(Level level) {
-		this.level = level;
-		this.player = new Player(level.getPlayerSpawn());
 		this.tileMap = level.getTileMap();
-		this.tileSize = level.getTileMap().getTileSize();
-		this.playerWidth = player.getWidth();
-		this.playerHeight = player.getHeight();
+		this.player = new Player(level.getPlayerSpawn());
 		this.camera = new Camera(tileMap, player);
+		
+		this.tileSize = tileMap.getTileSize();
+		playerWidth = player.getWidth();
+		playerHeight = player.getHeight();
 	}
 	
-	public void update(GameInput input, int delta) {
-		player.update(input, delta);
-		correctPlayerPosition(delta);
+	public void update(WorldInput input, float time) {
+		player.update(input, time);
+		correctPlayerPosition(time);
 		camera.update();
 	}
 	 
 	public void render(Graphics graphics) {
-		int offsetX = (int) -camera.getX();
-		int offsetY = (int) -camera.getY();
-		int tileX = offsetX / tileSize - 1;
-		int tileY = offsetY / tileSize - 1;
-		int width = 100;
-		int height = 100;
-		
-		level.getTileMap().render(offsetX, offsetY, 0, 0, width, height);
-		graphics.translate(offsetX, offsetY);
-		graphics.draw(player.getRectangle());
+		camera.render(graphics);
 	}
 	
-	public Player getPlayer() {
-		return player;
-	}
-	
-	public void correctPlayerPosition(int delta) {
-		float time = delta / 1000.0f;
-		Point newPosition = checkCollision(time);
-		player.setPosition(newPosition);
+	public void correctPlayerPosition(float time) {
+		Point correctedPosition = checkCollision(time);
+		player.setPosition(correctedPosition);
 	}
 	
 	public Point checkCollision(float time) {

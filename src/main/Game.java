@@ -14,8 +14,10 @@ import org.newdawn.slick.state.StateBasedGame;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.EndPoint;
+import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
+import enums.GameState;
 import states.*;
 import util.Dimension;
 import world.CollisionMap;
@@ -24,9 +26,8 @@ import world.CollisionMap.TileNotSquareException;
 
 public class Game extends StateBasedGame {
 	
-	static final Dimension TARGET_RESOLUTION = new Dimension(1920, 1080);
-	static GameServer server = null;
-	static GameClient client = null;
+	public static final Dimension TARGET_RESOLUTION = new Dimension(1920, 1080);
+	static Listener network = null;
 	
 	public Game() {
 		super("Elements 3");
@@ -34,34 +35,40 @@ public class Game extends StateBasedGame {
 
 	@Override
 	public void initStatesList(GameContainer container) throws SlickException {
-		//container.getGraphics().scale(0.5f,0.5f);
 		addState(new MenuState());
-		addState(new LobbyState());
 		addState(new PlayState());
 	}
 	
-	public static Dimension getTargetResolution() {
-		return TARGET_RESOLUTION;
+	public void startServer() throws IOException {
+		network = new GameServer(this);
 	}
 	
-	public static void startServer() throws IOException {
-		server = new GameServer();
+	public void startClient(String host) throws IOException {
+		network = new GameClient(host, this);
 	}
 	
-	public static GameServer getServer() {
-		return server;
+	public void enterPlayState() {
+		enterState(GameState.PlayState.getID());
 	}
 	
-	public static void setClient(GameClient c) {
-		client = c;
+	public PlayState getPlayState() {
+		return (PlayState) getState(GameState.PlayState.getID());
 	}
 	
-	public static GameClient getClient() {
-		return client;
+	public boolean isSinglePlayer() {
+		return network == null;
 	}
 	
-	public static boolean isHost() {
-		return server != null;
+	public boolean isHost() {
+		return network instanceof GameServer;
+	}
+	
+	public boolean isClient() {
+		return network instanceof GameClient;
+	}
+	
+	public Listener getNetwork() {
+		return network;
 	}
 	
 	public static void main(String[] args) throws SlickException {

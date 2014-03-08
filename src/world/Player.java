@@ -1,15 +1,15 @@
 package world;
 
-import networking.GameRole;
-
 import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 
+import enums.GameRole;
+import enums.PlayerState;
 import states.PlayState;
-import util.GameInput;
+import util.WorldInput;
 
 public class Player {
 	
@@ -72,9 +72,7 @@ public class Player {
 		this.positionChanged = false;
 	}
 
-	public void update(GameInput input, int delta) {
-		float time = delta / 1000.0f;
-		
+	public void update(WorldInput input, float time) {
 		isOnFloor = state == PlayerState.FLOOR;
 		isInAir = state == PlayerState.AIR;
 		isOnLeftWall = state == PlayerState.LEFT_WALL;

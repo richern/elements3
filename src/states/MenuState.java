@@ -1,4 +1,4 @@
-package states;
+ package states;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ import menu.Action;
 import menu.Menu;
 import menu.Option;
 import networking.GameClient;
-import networking.GameRole;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
@@ -19,22 +18,26 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
+import enums.GameRole;
+import enums.GameState;
+
 public class MenuState extends BasicGameState {
 	
-	static Menu currentMenu;
 	static Menu rootMenu;
-	static ArrayList<Option> options;
-	static int currentOption;
+	static Menu currentMenu;
 
 	@Override
-	public void init(GameContainer container, final StateBasedGame sbg)
+	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
+		final Game game = (Game) sbg;
+		final PlayState playState = game.getPlayState();
+		
 		Menu mainMenu = new Menu("main");
 		
 		Action singlePlayer = new Action("Single Player", new Callable<Void>() {
 			public Void call() {
-				PlayState.role = GameRole.ALL;
-				sbg.enterState(GameState.PlayState.getID());
+				playState.setRole(GameRole.ALL);
+				game.enterPlayState();
 				return null;
 			}
 		});
@@ -42,12 +45,12 @@ public class MenuState extends BasicGameState {
 		Action hostGame = new Action("Host Game", new Callable<Void>() {
 			public Void call() {
 				try {
-					Game.startServer();
-					Game.setClient(new GameClient("localhost", sbg));
+					playState.setRole(GameRole.JUMP);
+					game.startServer();
+					game.enterPlayState();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				sbg.enterState(GameState.LobbyState.getID());
 				System.out.println("Hosting game");
 				return null;
 			}
@@ -56,11 +59,10 @@ public class MenuState extends BasicGameState {
 		Action findGame = new Action("Find Game", new Callable<Void>() {
 			public Void call() {
 				try {
-					Game.setClient(new GameClient("localhost", sbg));
+					game.startClient("localhost");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				sbg.enterState(GameState.LobbyState.getID());
 				System.out.println("Joining game");
 				return null;
 			}
@@ -80,40 +82,13 @@ public class MenuState extends BasicGameState {
 	@Override
 	public void update(GameContainer container, StateBasedGame sbg, int delta)
 			throws SlickException {
-		Input input = container.getInput();
-		boolean up = input.isKeyPressed(Input.KEY_UP);
-		boolean down = input.isKeyPressed(Input.KEY_DOWN);
-		boolean enter = input.isKeyPressed(Input.KEY_ENTER);
-		
-		if(up && down) {}
-		else if(up) {
-			decrementOption();
-		}
-		else if(down) {
-			incrementOption();
-		}
-		else if(enter) {
-			selectOption();
-		}
+		currentMenu.update(container, sbg, delta);
 	}
 
 	@Override
 	public void render(GameContainer container, StateBasedGame sbg, Graphics graphics)
 			throws SlickException {
-		int x = 30;
-		int y = 30;
-		
-		for(int i=0; i < options.size(); i++) {
-			String text = options.get(i).getText();
-			if(i == currentOption) {
-				graphics.setColor(Color.yellow);
-			}
-			else {
-				graphics.setColor(Color.white);
-			}
-			graphics.drawString(text, x, y);
-			y += 30;
-		}
+		currentMenu.render(container, sbg, graphics);
 	}
 	
 	@Override
@@ -121,22 +96,8 @@ public class MenuState extends BasicGameState {
 		return GameState.MenuState.getID();
 	}
 	
-	public void decrementOption() {
-		currentOption = currentOption == 0 ? options.size() - 1 : currentOption - 1; 
-	}
-	
-	public void incrementOption() {
-		currentOption = currentOption == options.size() - 1 ? 0 : currentOption + 1;
-	}
-	
-	public void selectOption() {
-		options.get(currentOption).open();
-	}
-	
 	public static void setCurrentMenu(Menu menu) {
 		currentMenu = menu;
-		options = menu.getOptions();
-		currentOption = 0;
 	}
 	
 }

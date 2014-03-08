@@ -1,31 +1,31 @@
 package networking;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 
-import org.newdawn.slick.state.StateBasedGame;
-
-import states.GameState;
 import states.PlayState;
-import util.GameInput;
-import networking.packets.GameStartPacket;
-import networking.packets.InputPacket;
-import networking.packets.RolePacket;
+import main.Game;
+import networking.packets.*;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
+import enums.GameRole;
+
 public class GameClient extends Listener {
 	
-	static Client client;
-	static InetSocketAddress hostIP;
-	StateBasedGame sbg;
+	Game game;
+	Client client;
+	String host;
 	
-	
-	public GameClient(String host, StateBasedGame sbg) throws IOException {
-		this.sbg = sbg;
+	public GameClient(String host, Game game) throws IOException {
+		this.game = game;
+		this.host = host;
 		client = new Client();
+		connect();
+	}
+	
+	public void connect() throws IOException {
 		Network.register(client);
 		client.addListener(this);
 		client.start();
@@ -33,39 +33,18 @@ public class GameClient extends Listener {
 	}
 	
 	public void connected(Connection connection) {
-		hostIP = connection.getRemoteAddressTCP();
-		System.out.println("Client connected to " + hostIP);
+		System.out.println("Client connected");
 	}
 	
 	public void received(Connection connection, Object packet) {
-		if(packet instanceof RolePacket) {
-			PlayState.role = ((RolePacket) packet).role;
-			System.out.println("received role packet " + ((RolePacket) packet).toString());
+		if(packet instanceof GameInitPacket) {
+			GameInitPacket gameInitPacket = (GameInitPacket) packet;
+			PlayState playState = game.getPlayState();
+			GameRole role = gameInitPacket.role;
+			
+			playState.setRole(role);
+			game.enterPlayState();
 		}
-		else if(packet instanceof GameStartPacket) {
-			sbg.enterState(GameState.PlayState.getID());
-		}
-		else if(packet instanceof InputPacket) {
-			InputPacket inputPacket = (InputPacket) packet;
-			PlayState.input = inputPacket.input;
-			int delta = inputPacket.delta;
-			PlayState.getWorld().update(PlayState.input, delta);
-		}
-	}
-	
-	public static void sendInputPacket(GameInput input, int delta) {
-		InputPacket inputPacket = new InputPacket();
-		inputPacket.input = input;
-		inputPacket.delta = delta;
-		client.sendTCP(inputPacket);
-	}
-	
-	public static InetSocketAddress getHostIP() {
-		return hostIP;
-	}
-	
-	public static Client getClient() {
-		return client;
 	}
 
 }

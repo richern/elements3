@@ -1,15 +1,16 @@
 package world;
 
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
 
 import main.Game;
 
 public class Camera {
 	
-	// camera attempts to center player
+	// camera attempts to center player, locks when out of bounds
 	
-	private static final float CAM_WIDTH = Game.getTargetResolution().getWidth();;
-	private static final float CAM_HEIGHT = Game.getTargetResolution().getHeight();;
+	private static final float CAM_WIDTH = Game.TARGET_RESOLUTION.getWidth();;
+	private static final float CAM_HEIGHT = Game.TARGET_RESOLUTION.getHeight();;
 	
 	private final float TILEMAP_WIDTH;
 	private final float TILEMAP_HEIGHT;
@@ -19,9 +20,11 @@ public class Camera {
 	private float camX;
 	private float camY;
 	
+	private CollisionMap tileMap;
 	private Player player;
 	
 	public Camera(CollisionMap tileMap, Player player) {
+		this.tileMap = tileMap;
 		this.TILEMAP_WIDTH = tileMap.getWidth() * tileMap.getTileSize();
 		this.TILEMAP_HEIGHT = tileMap.getHeight() * tileMap.getTileSize();
 		this.PADDING_X = (CAM_WIDTH - TILEMAP_WIDTH) / 2;
@@ -34,6 +37,15 @@ public class Camera {
 		if(!player.isPositionChanged()) return;
 		setCenter();
 		adjust();
+	}
+	
+	public void render(Graphics graphics) {
+		int offsetX = (int) -camX;
+		int offsetY = (int) -camY;
+		
+		tileMap.render(offsetX, offsetY);
+		graphics.translate(offsetX, offsetY);
+		graphics.draw(player.getRectangle());
 	}
 	
 	public void setCenter() {
@@ -79,12 +91,12 @@ public class Camera {
 		}
 	}
 	
-	public float getX() {
-		return camX;
+	public float getOffsetX() {
+		return (int) -camX;
 	}
 	
-	public float getY() {
-		return camY;
+	public float getOffsetY() {
+		return (int) -camY;
 	}
 	
 	public float getCamWidth() {
