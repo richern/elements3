@@ -93,7 +93,7 @@ public class MenuState extends BasicGameState {
 	
 	@Override
 	public int getID() {
-		return GameState.MenuState.getID();
+		return GameState.MENU.getID();
 	}
 	
 	public static void setCurrentMenu(Menu menu) {

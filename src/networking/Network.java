@@ -1,7 +1,7 @@
 package networking;
 
 import networking.packets.*;
-import util.WorldInput;
+import util.GlobalInput;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
@@ -16,6 +16,8 @@ public class Network {
 		Kryo kryo = endPoint.getKryo();
 		kryo.register(GameRole.class);
 		kryo.register(GameInitPacket.class);
+		kryo.register(ActionPacket.class);
+		kryo.register(PlayerPacket.class);
 	}
 
 }

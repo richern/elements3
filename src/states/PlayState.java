@@ -1,7 +1,10 @@
 package states;
 
+import java.util.HashMap;
+
 import main.Game;
 import networking.GameClient;
+import networking.GameServer;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -15,10 +18,10 @@ import com.esotericsoftware.kryonet.Listener;
 
 import enums.GameRole;
 import enums.GameState;
-import util.PlayerInput;
-import util.WorldInput;
+import util.GlobalInput;
 import world.CollisionMap;
 import world.Level;
+import world.Player;
 import world.World;
 	
 public class PlayState extends BasicGameState {
@@ -26,7 +29,8 @@ public class PlayState extends BasicGameState {
 	World world;
 	GameRole role;
 	Listener network;
-	PlayerInput input;
+	HashMap<Integer, Boolean> playerInput;
+	HashMap<Integer, Boolean> globalInput;
 
 	@Override
 	public void init(GameContainer container, StateBasedGame sbg)
@@ -37,10 +41,13 @@ public class PlayState extends BasicGameState {
 		catch(Exception e) {
 			e.printStackTrace();
 		}
-		network = ((Game) sbg).getNetwork();
-		input = new PlayerInput();
+		playerInput = new HashMap<Integer, Boolean>();
+		globalInput = new HashMap<Integer, Boolean>();
+		initInput(playerInput);
+		initInput(globalInput);
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	@Override
 	public void update(GameContainer container, StateBasedGame sbg, int delta)
 			throws SlickException {
@@ -48,17 +55,36 @@ public class PlayState extends BasicGameState {
 		float time = delta / 1000.0f;
 		
 		if(game.isHost()) {
-			input.register(Input input);
-			world.update(input, time);
+			boolean spaceKey = playerInput.get(Input.KEY_SPACE);
+			Player player = world.getPlayer();
+						
+			if(spaceKey) translateAction(role);
+			world.update(globalInput, time);
+			
+			if(player.isPositionChanged()) {
+				((GameServer) network).sendPlayerPacket();
+			}
 		}
 		else if(game.isClient()) {
+			boolean spaceKey = playerInput.get(Input.KEY_SPACE);
 			
+			if(spaceKey) {
+				((GameClient) network).sendActionPacket();
+			}
+			
+			world.update(time);
 		}
 		else {
-			input.update(role, container.getInput());
-			world.update(input, time);
+			globalInput.putAll(playerInput);
+			world.update(globalInput, time);
 		}
 		
+		resetInput();
+	}
+	
+	@Override
+	public void enter(GameContainer container, StateBasedGame game) {
+		network = ((Game) game).getNetwork();
 	}
 	
 	@Override
@@ -69,12 +95,60 @@ public class PlayState extends BasicGameState {
 	}
 	
 	@Override
+	public void keyPressed(int key, char c) {
+		if(playerInput.containsKey(key)) {
+			playerInput.put(key, true); 
+		}
+	}
+	
+	@Override
+	public void keyReleased(int key, char c) {
+		if(playerInput.containsKey(key)) {
+			playerInput.put(key, true); 
+		}
+	}
+	
+	@Override
 	public int getID() {
-		return GameState.PlayState.getID();
+		return GameState.PLAY.getID();
+	}
+	
+	public void translateAction(GameRole role) {
+		switch(role){
+		case LEFT:
+			globalInput.put(Input.KEY_LEFT, true);
+			break;
+		case RIGHT:
+			globalInput.put(Input.KEY_RIGHT, true);
+			break;
+		case JUMP:
+			globalInput.put(Input.KEY_UP, true);
+			break;
+		}
+	}
+	
+	public void initInput(HashMap<Integer, Boolean> input) {
+		input.put(Input.KEY_LEFT, false);
+		input.put(Input.KEY_RIGHT, false);
+		input.put(Input.KEY_UP, false);
+		input.put(Input.KEY_SPACE, false);
+		input.put(Input.KEY_ESCAPE, false);
+	}
+	
+	public void resetInput() {
+		for(Integer key : playerInput.keySet()) {
+			playerInput.put(key, false);
+		}
+		for(Integer key : globalInput.keySet()) {
+			globalInput.put(key, false);
+		}
 	}
 	
 	public void setRole(GameRole role) {
 		this.role = role;
 	}
 	
+	public World getWorld() {
+		return world;
+	}
 }

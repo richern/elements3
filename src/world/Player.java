@@ -1,5 +1,7 @@
 package world;
 
+import java.util.HashMap;
+
 import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.geom.Rectangle;
@@ -9,7 +11,7 @@ import org.newdawn.slick.geom.Vector2f;
 import enums.GameRole;
 import enums.PlayerState;
 import states.PlayState;
-import util.WorldInput;
+import util.GlobalInput;
 
 public class Player {
 	
@@ -37,6 +39,10 @@ public class Player {
 	private float dx;
 	private float dy;
 	
+	boolean left;
+	boolean right;
+	boolean up;
+	
 	private boolean hasJump;
 	private boolean jumping;
 	private boolean jumpReleased;
@@ -57,6 +63,10 @@ public class Player {
 		this.dx = 0;
 		this.dy = 0;
 		
+		this.left = false;
+		this.right = false;
+		this.up = false;
+		
 		this.hasJump = false;
 		this.jumping = false;
 		this.jumpReleased = false;
@@ -72,15 +82,19 @@ public class Player {
 		this.positionChanged = false;
 	}
 
-	public void update(WorldInput input, float time) {
+	public void update(HashMap<Integer, Boolean> input, float time) {
 		isOnFloor = state == PlayerState.FLOOR;
 		isInAir = state == PlayerState.AIR;
 		isOnLeftWall = state == PlayerState.LEFT_WALL;
 		isOnRightWall = state == PlayerState.RIGHT_WALL;
 
-		boolean left = input.left;
-		boolean right = input.right;
-		boolean up = input.up;
+		boolean leftKey = input.get(Input.KEY_LEFT);
+		boolean rightKey = input.get(Input.KEY_RIGHT);
+		boolean upKey = input.get(Input.KEY_UP);
+		
+		left = left ^ leftKey;
+		right = right ^ rightKey;
+		up = up ^ upKey;
 		
 		if(left && right || !left && !right) idle(time);
 		if(left) moveLeft(time);
@@ -89,6 +103,11 @@ public class Player {
 		if(!up) notJumping(time);
 				
 		gravity(time);
+	}
+	
+	public void update(Point playerPosition) {
+		x = playerPosition.getX();
+		y = playerPosition.getY();
 	}
 	
 	public void idle(float time) {
@@ -164,7 +183,7 @@ public class Player {
 		newdy = newdy > maxFallSpeed ? maxFallSpeed : newdy;
 		dy = newdy;
 	}
-	
+		
 	// getters & setters
 	public float getWidth() {
 		return WIDTH;
@@ -179,8 +198,12 @@ public class Player {
 	}
 	
 	public void setPosition(Point p) {
-		x = p.getX();
-		y = p.getY();
+		float newX = p.getX();
+		float newY = p.getY();
+		
+		positionChanged = x != newX || y != newY;
+		x = newX;
+		y = newY;
 	}
 	
 	public Vector2f getVelocity() {
@@ -214,10 +237,6 @@ public class Player {
 	
 	public void setState(PlayerState state) {
 		this.state = state;
-	}
-	
-	public void setPositionChanged(boolean b) {
-		positionChanged = b;
 	}
 	
 	public boolean isPositionChanged() {

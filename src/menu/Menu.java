@@ -49,16 +49,15 @@ public class Menu extends Option {
 		int y = 30;
 		
 		for(int i=0; i < options.size(); i++) {
+			graphics.setColor(Color.white);
 			String text = options.get(i).getText();
 			if(i == currentOption) {
 				graphics.setColor(Color.yellow);
 			}
-			else {
-				graphics.setColor(Color.white);
-			}
 			graphics.drawString(text, x, y);
 			y += 30;
 		}
+		graphics.setColor(Color.white);
 	}
 	
 	public ArrayList<Option> getOptions() {

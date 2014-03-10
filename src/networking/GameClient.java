@@ -1,8 +1,11 @@
-package networking;
+	package networking;
 
 import java.io.IOException;
 
+import org.newdawn.slick.geom.Point;
+
 import states.PlayState;
+import world.World;
 import main.Game;
 import networking.packets.*;
 
@@ -38,13 +41,21 @@ public class GameClient extends Listener {
 	
 	public void received(Connection connection, Object packet) {
 		if(packet instanceof GameInitPacket) {
-			GameInitPacket gameInitPacket = (GameInitPacket) packet;
-			PlayState playState = game.getPlayState();
-			GameRole role = gameInitPacket.role;
-			
-			playState.setRole(role);
 			game.enterPlayState();
 		}
+		else if(packet instanceof PlayerPacket) {
+			World world = game.getPlayState().getWorld();
+			PlayerPacket playerPacket = (PlayerPacket) packet;
+			Point position = new Point(playerPacket.x, playerPacket.y);
+			
+			world.update(position);
+			System.out.println("world updated");
+		}
+	}
+	
+	public void sendActionPacket() {
+		client.sendTCP(new ActionPacket());
+		System.out.println("sent action packet");
 	}
 
 }

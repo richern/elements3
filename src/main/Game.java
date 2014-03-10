@@ -27,7 +27,7 @@ import world.CollisionMap.TileNotSquareException;
 public class Game extends StateBasedGame {
 	
 	public static final Dimension TARGET_RESOLUTION = new Dimension(1920, 1080);
-	static Listener network = null;
+	public static Listener network;
 	
 	public Game() {
 		super("Elements 3");
@@ -48,11 +48,11 @@ public class Game extends StateBasedGame {
 	}
 	
 	public void enterPlayState() {
-		enterState(GameState.PlayState.getID());
+		enterState(GameState.PLAY.getID());
 	}
 	
 	public PlayState getPlayState() {
-		return (PlayState) getState(GameState.PlayState.getID());
+		return (PlayState) getState(GameState.PLAY.getID());
 	}
 	
 	public boolean isSinglePlayer() {

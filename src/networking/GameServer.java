@@ -1,10 +1,14 @@
 package networking;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import util.WorldInput;
+import org.newdawn.slick.Input;
+
+import states.PlayState;
+import world.Player;
 import main.Game;
 import networking.packets.*;
 
@@ -20,11 +24,12 @@ public class GameServer extends Listener {
 	Game game;
 	Server server;
 	final int PORT = Network.PORT;
-	Map<GameRole, Integer> rolesToConnections = new HashMap<GameRole, Integer>();
-	WorldInput input = new WorldInput();
+	Map<Integer, GameRole> rolesToConnections = new HashMap<Integer, GameRole>();
+	ArrayList<GameRole> roles = new ArrayList<GameRole>();
 	
 	public GameServer(Game game) throws IOException {
-		initializeMap();
+		initRoles();
+		initMap();
 		this.game = game;
 		this.server = new Server();
 		connect();
@@ -38,31 +43,51 @@ public class GameServer extends Listener {
 		System.out.println("Server started on " + PORT);
 	}
 	
-	public void initializeMap() {
-		rolesToConnections.put(GameRole.LEFT, null);
-		rolesToConnections.put(GameRole.RIGHT, null);
+	public void initRoles() {
+		roles.add(GameRole.LEFT);
+		roles.add(GameRole.RIGHT);
+	}
+	
+	public void initMap() {
+		
 	}
 	
 	public void connected(Connection connection) {
-		for(Map.Entry<GameRole, Integer> rtc : rolesToConnections.entrySet()) {
-			GameRole role = rtc.getKey();
-			Integer connectionId = rtc.getValue();
+		GameRole role = roles.remove(0);
+		int connectionId = connection.getID();
 			
-			if(connectionId == null) {
-				rolesToConnections.put(role, connectionId);
-				GameInitPacket gameInitPacket = new GameInitPacket();
-				gameInitPacket.role = role;
-				connection.sendTCP(gameInitPacket);
-			}
-		}
+		rolesToConnections.put(connectionId, role);
+		GameInitPacket gameInitPacket = new GameInitPacket();
+		connection.sendTCP(gameInitPacket);
+		sendPlayerPacket();
 	}
 	
 	public void received(Connection connection, Object packet) {
+		PlayState playState = game.getPlayState();
+		int connectionId = connection.getID();
+		
+		if(packet instanceof ActionPacket) {
+			System.out.println("received action packet from " + connectionId);
+			GameRole role = rolesToConnections.get(connectionId);
+			
+			playState.translateAction(role);
+		}
 	}
 	
 	public void disconnected(Connection connection) {
 		
 		System.out.println("Disconnected: " + connection.getID());
+	}
+	
+	public void sendPlayerPacket() {
+		Player player = game.getPlayState().getWorld().getPlayer();
+		float x = player.getPosition().getX();
+		float y = player.getPosition().getY();
+		
+		PlayerPacket playerPacket = new PlayerPacket();
+		playerPacket.x = x;
+		playerPacket.y = y;
+		server.sendToAllTCP(playerPacket);
 	}
 
 }

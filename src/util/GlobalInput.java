@@ -7,7 +7,7 @@ import states.PlayState;
 
 // wrapper for slick.input
 
-public class WorldInput extends GameInput {
+public class GlobalInput {
 	
 	public boolean left = false;
 	public boolean right = false;
@@ -29,7 +29,7 @@ public class WorldInput extends GameInput {
 	}
 	
 	//TODO:
-	/*public void update(GameRole role, Input input) {
+	public void update(GameRole role, Input input) {
 		if(role == GameRole.ALL) {
 			left = input.isKeyDown(Input.KEY_LEFT);
 			right = input.isKeyDown(Input.KEY_RIGHT);
@@ -38,6 +38,6 @@ public class WorldInput extends GameInput {
 		else {
 			update(role, input.isKeyDown(Input.KEY_SPACE));
 		}
-	}*/
+	}
 	
 }

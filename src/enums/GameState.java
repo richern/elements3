@@ -1,7 +1,7 @@
 package enums;
 
 public enum GameState {
-	PlayState(0), MenuState(1), LobbyState(2), FindLobbyState(3);
+	PLAY(0), MENU(1);
 	
 	private int id;
 	

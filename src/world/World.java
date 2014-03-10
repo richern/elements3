@@ -1,6 +1,7 @@
 package world;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -15,7 +16,7 @@ import org.newdawn.slick.tiled.TiledMap;
 
 import enums.GameRole;
 import enums.PlayerState;
-import util.WorldInput;
+import util.GlobalInput;
 
 public class World {
 	
@@ -39,8 +40,18 @@ public class World {
 		playerHeight = player.getHeight();
 	}
 	
-	public void update(WorldInput input, float time) {
+	public void update(HashMap<Integer, Boolean> input, float time) {
 		player.update(input, time);
+		correctPlayerPosition(time);
+		camera.update();
+	}
+	
+	public void update(Point playerPosition) {
+		player.update(playerPosition);
+		camera.update();
+	}
+	
+	public void update(float time) {
 		correctPlayerPosition(time);
 		camera.update();
 	}
@@ -115,11 +126,10 @@ public class World {
 			player.removeJump();
 		}
 		
-		player.setPositionChanged(oldX != finalX || oldY != finalY);
 		return new Point(finalX, finalY);
 	}
 	
-	public Float leftCollision(float velocityX, float newX, float oldY) {
+	private Float leftCollision(float velocityX, float newX, float oldY) {
 		if(velocityX > 0) return null;
 		
 		float leftX = newX - playerWidth / 2 - 2;
@@ -140,7 +150,7 @@ public class World {
 		}
 	}
 	
-	public Float rightCollision(float velocityX, float newX, float oldY) {
+	private Float rightCollision(float velocityX, float newX, float oldY) {
 		if(velocityX < 0)  return null;
 		
 		float rightX = newX + playerWidth / 2;
@@ -161,7 +171,7 @@ public class World {
 		}
 	}
 	
-	public Float bottomCollision(float velocityY, float oldX, float newY) {
+	private Float bottomCollision(float velocityY, float oldX, float newY) {
 		if(velocityY < 0) return null;
 		
 		float leftX = oldX - playerWidth / 2;
@@ -182,7 +192,7 @@ public class World {
 		}
 	}
 	
-	public Float topCollision(float velocityY, float oldX, float newY) {
+	private Float topCollision(float velocityY, float oldX, float newY) {
 		if(velocityY > 0) return null;
 		
 		float leftX = oldX - playerWidth / 2;
@@ -201,6 +211,10 @@ public class World {
 		else {
 			return null;
 		}
+	}
+	
+	public Player getPlayer() {
+		return player;
 	}
 	
 }
