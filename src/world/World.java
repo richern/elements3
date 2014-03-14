@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Line;
 import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.geom.Rectangle;
@@ -30,7 +31,7 @@ public class World {
 	private float playerWidth;
 	private float playerHeight;
 	
- 	public World(Level level) {
+ 	public World(Level level) throws SlickException {
 		this.tileMap = level.getTileMap();
 		this.player = new Player(level.getPlayerSpawn());
 		this.camera = new Camera(tileMap, player);
@@ -107,24 +108,44 @@ public class World {
 		}
 		else {
 			finalY = newY;
+			player.removeJump();
 		}
 		
-		// set player state to change physics based on state
+		// set player state
+		PlayerState playerState = player.getState();
 		if(bottomCollision != null){
-			player.setState(PlayerState.FLOOR);
+			if(velocityX > 0) {
+				player.setState(PlayerState.WALK_RIGHT);
+			}
+			else if(velocityX < 0) {
+				player.setState(PlayerState.WALK_LEFT);
+			}
+			else {
+				if(playerState.isFacingLeft()) {
+					player.setState(PlayerState.IDLE_LEFT);
+				}
+				else {
+					player.setState(PlayerState.IDLE_RIGHT);
+				}
+			}
 		}
 		else if(leftCollision != null) {
-			player.setState(PlayerState.LEFT_WALL);
+			player.setState(PlayerState.WALL_LEFT);
 			player.restoreJump();
 		}
 		else if(rightCollision != null) {
-			player.setState(PlayerState.RIGHT_WALL);
+			player.setState(PlayerState.WALL_RIGHT);
 			player.restoreJump();
 		}
 		else {
-			player.setState(PlayerState.AIR);
-			player.removeJump();
+			if(newX > oldX) {
+				player.setState(PlayerState.JUMP_RIGHT);
+			}
+			else {
+				player.setState(PlayerState.JUMP_LEFT);
+			}
 		}
+
 		
 		return new Point(finalX, finalY);
 	}

@@ -45,6 +45,7 @@ public class Camera {
 		
 		tileMap.render(offsetX, offsetY);
 		graphics.translate(offsetX, offsetY);
+		player.render(graphics);
 		graphics.draw(player.getRectangle());
 	}
 	

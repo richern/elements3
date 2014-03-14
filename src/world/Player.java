@@ -2,7 +2,11 @@ package world;
 
 import java.util.HashMap;
 
+import org.newdawn.slick.Animation;
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
@@ -15,10 +19,11 @@ import util.GlobalInput;
 
 public class Player {
 	
-	// The player can attempt to set its position, but ultimately the world will check and correct for collision
+	// The player does not set its position, just velocity
+	// The world will check for collision and set position
 	
-	private static final float WIDTH = 22;
-	private static final float HEIGHT = 22;
+	private static final float WIDTH = 32;
+	private static final float HEIGHT = 32;
 	
 	private static final float MAX_SPEED = 600;
 	private static final float ACCELERATION = 1200;
@@ -33,6 +38,8 @@ public class Player {
 	private static final float WALL_JUMP_SPEED = MAX_SPEED / 2;
 	private static final float WALL_GRAVITY = GRAVITY / 3;
 	private static final float WALL_SLIDE_SPEED = MAX_FALL_SPEED / 5;
+	
+	private static final int animationSpeed = 50;
 	
 	private float x;
 	private float y;
@@ -57,7 +64,17 @@ public class Player {
 	
 	private boolean positionChanged; // lets camera know to update
 	
-	public Player(Point position) {
+	SpriteSheet spritesheet;
+	Animation idlingLeft;
+	Animation idlingRight;
+	Animation walkingLeft;
+	Animation walkingRight;
+	Animation jumpingLeft;
+	Animation jumpingRight;
+	Animation wallingLeft;
+	Animation wallingRight;
+	
+	public Player(Point position) throws SlickException {
 		this.x = position.getX();
 		this.y = position.getY();
 		this.dx = 0;
@@ -73,20 +90,30 @@ public class Player {
 		this.jumpTime = 0;
 		this.wallTime = 0;
 		
-		this.state = PlayerState.INIT;
+		this.state = PlayerState.IDLE_RIGHT;
 		this.isOnFloor = false;
 		this.isInAir = false;
 		this.isOnLeftWall = false;
 		this.isOnRightWall = false;
 		
 		this.positionChanged = false;
+		
+		spritesheet = new SpriteSheet("resources/spritesheets/player.png", 192, 192);
+		idlingLeft = new Animation(spritesheet, 2, 0, 2, 0, true, animationSpeed, true);
+		idlingRight = new Animation(spritesheet, 4, 1, 4, 1, true, animationSpeed, true);
+		walkingLeft = new Animation(spritesheet, 3, 0, 4, 0, true, animationSpeed, true);
+		walkingRight = new Animation(spritesheet, 0, 2, 2, 2, true, animationSpeed, true);
+		jumpingLeft = new Animation(spritesheet, 1, 0, 1, 0, true, animationSpeed, true);
+		jumpingRight = new Animation(spritesheet, 3, 1, 3, 1, true, animationSpeed, true);
+		wallingLeft = new Animation(spritesheet, 1, 1, 1, 1, true, animationSpeed, true);
+		wallingRight = new Animation(spritesheet, 3, 2, 3, 2, true, animationSpeed, true);
 	}
 
 	public void update(HashMap<Integer, Boolean> input, float time) {
-		isOnFloor = state == PlayerState.FLOOR;
-		isInAir = state == PlayerState.AIR;
-		isOnLeftWall = state == PlayerState.LEFT_WALL;
-		isOnRightWall = state == PlayerState.RIGHT_WALL;
+		isOnFloor = state.isOnFloor();
+		isInAir = state.isInAir();
+		isOnLeftWall = state.isOnLeftWall();
+		isOnRightWall = state.isOnRightWall();
 
 		boolean leftKey = input.get(Input.KEY_LEFT);
 		boolean rightKey = input.get(Input.KEY_RIGHT);
@@ -224,6 +251,39 @@ public class Player {
 		return new Rectangle(topLeftX, topLeftY, WIDTH, HEIGHT);
 	}
 	
+	public void render(Graphics graphics) {
+		//graphics.scale(32f/192f, 32f/192f);
+		float topLeftX = x - WIDTH / 2;
+		float topLeftY = y - HEIGHT / 2;
+		
+		switch(state) {
+		case IDLE_LEFT:
+			graphics.drawAnimation(idlingLeft, topLeftX, topLeftY);
+			break;
+		case IDLE_RIGHT:
+			graphics.drawAnimation(idlingRight, topLeftX, topLeftY);
+			break;
+		case WALK_LEFT:
+			graphics.drawAnimation(walkingLeft, topLeftX, topLeftY);
+			break;
+		case WALK_RIGHT:
+			graphics.drawAnimation(walkingRight, topLeftX, topLeftY);
+			break;
+		case JUMP_LEFT:
+			graphics.drawAnimation(jumpingLeft, topLeftX, topLeftY);
+			break;
+		case JUMP_RIGHT:
+			graphics.drawAnimation(jumpingRight, topLeftX, topLeftY);
+			break;
+		case WALL_LEFT:
+			graphics.drawAnimation(wallingLeft, topLeftX, topLeftY);
+			break;
+		case WALL_RIGHT:
+			graphics.drawAnimation(wallingRight, topLeftX, topLeftY);
+			break;
+		}
+	}
+	
 	public void restoreJump() {
 		if(!jumping) {
 			hasJump = true;
@@ -237,6 +297,10 @@ public class Player {
 	
 	public void setState(PlayerState state) {
 		this.state = state;
+	}
+	
+	public PlayerState getState() {
+		return state;
 	}
 	
 	public boolean isPositionChanged() {
