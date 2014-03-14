@@ -145,7 +145,6 @@ public class World {
 				player.setState(PlayerState.JUMP_LEFT);
 			}
 		}
-
 		
 		return new Point(finalX, finalY);
 	}

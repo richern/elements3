@@ -34,7 +34,7 @@ public class Player {
 	private static final float MIN_JUMP_TIME = 50;
 	private static final float MAX_JUMP_TIME = 200;
 	
-	private static final float MAX_WALL_TIME = 500;
+	private static final float MAX_WALL_TIME = 500; // time player is stuck to wall when moving in opposite direction
 	private static final float WALL_JUMP_SPEED = MAX_SPEED / 2;
 	private static final float WALL_GRAVITY = GRAVITY / 3;
 	private static final float WALL_SLIDE_SPEED = MAX_FALL_SPEED / 5;
