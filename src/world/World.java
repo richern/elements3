@@ -78,7 +78,9 @@ public class World {
 		
 		float finalX;
 		float finalY;
-				
+		
+		//physics
+		
 		// have to compare x and y directions separately
 		Float leftCollision = leftCollision(velocityX, newX, oldY);
 		Float rightCollision = rightCollision(velocityX, newX, oldY);
@@ -102,8 +104,8 @@ public class World {
 			player.setDy(0);
 			player.restoreJump();
 		}
-		else if(topCollision != null) {
-			finalY = topCollision;
+			else if(topCollision != null) {
+				finalY = topCollision;
 			player.setDy(0);
 		}
 		else {
