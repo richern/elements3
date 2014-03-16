@@ -28,6 +28,7 @@ public class World {
 	
 	// util
 	private int tileSize;
+	private Point oldPlayerPosition;
 	private float playerWidth;
 	private float playerHeight;
 	
@@ -42,8 +43,9 @@ public class World {
 	}
 	
 	public void update(HashMap<Integer, Boolean> input, float time) {
+		oldPlayerPosition = player.getPosition();
 		player.update(input, time);
-		correctPlayerPosition(time);
+		checkCollision();
 		camera.update();
 	}
 	
@@ -53,7 +55,7 @@ public class World {
 	}
 	
 	public void update(float time) {
-		correctPlayerPosition(time);
+		//correctPlayerPosition(time);
 		camera.update();
 	}
 	 
@@ -61,99 +63,25 @@ public class World {
 		camera.render(graphics);
 	}
 	
-	public void correctPlayerPosition(float time) {
-		Point correctedPosition = checkCollision(time);
-		player.setPosition(correctedPosition);
-	}
-	
-	public Point checkCollision(float time) {
-		float oldX = player.getPosition().getX();
-		float oldY = player.getPosition().getY();
-		
-		float velocityX = player.getVelocity().getX();
-		float velocityY = player.getVelocity().getY();
-		
-		float newX = oldX + velocityX * time;
-		float newY = oldY + velocityY * time;
-		
-		float finalX;
-		float finalY;
-		
-		//physics
-		
+	public void checkCollision() {
+		float oldX = oldPlayerPosition.getX();
+		float oldY = oldPlayerPosition.getY();
+		float velocityX = player.getDx();
+		float velocityY = player.getDy();
+		float newX = player.getX();
+		float newY = player.getY();
+
+		//compare with tile map
 		// have to compare x and y directions separately
-		Float leftCollision = leftCollision(velocityX, newX, oldY);
-		Float rightCollision = rightCollision(velocityX, newX, oldY);
-		Float bottomCollision = bottomCollision(velocityY, oldX, newY);
-		Float topCollision = topCollision(velocityY, oldX, newY);
+		Float leftCollision 	= velocityX > 0 ? null : leftCollision(newX, oldY);
+		Float rightCollision 	= velocityX < 0 ? null : rightCollision(newX, oldY);
+		Float bottomCollision 	= velocityY < 0 ? null : bottomCollision(oldX, newY);
+		Float topCollision 		= velocityY > 0 ? null : topCollision(oldX, newY);
 		
-		if(leftCollision != null) {
-			finalX = leftCollision;
-			player.setDx(0);
-		}
-		else if(rightCollision != null) {
-			finalX = rightCollision;
-			player.setDx(0);
-		}
-		else {
-			finalX = newX;
-		}
-			
-		if(bottomCollision != null) {
-			finalY = bottomCollision;
-			player.setDy(0);
-			player.restoreJump();
-		}
-			else if(topCollision != null) {
-				finalY = topCollision;
-			player.setDy(0);
-		}
-		else {
-			finalY = newY;
-			player.removeJump();
-		}
-		
-		// set player state
-		PlayerState playerState = player.getState();
-		if(bottomCollision != null){
-			if(velocityX > 0) {
-				player.setState(PlayerState.WALK_RIGHT);
-			}
-			else if(velocityX < 0) {
-				player.setState(PlayerState.WALK_LEFT);
-			}
-			else {
-				if(playerState.isFacingLeft()) {
-					player.setState(PlayerState.IDLE_LEFT);
-				}
-				else {
-					player.setState(PlayerState.IDLE_RIGHT);
-				}
-			}
-		}
-		else if(leftCollision != null) {
-			player.setState(PlayerState.WALL_LEFT);
-			player.restoreJump();
-		}
-		else if(rightCollision != null) {
-			player.setState(PlayerState.WALL_RIGHT);
-			player.restoreJump();
-		}
-		else {
-			if(newX > oldX) {
-				player.setState(PlayerState.JUMP_RIGHT);
-			}
-			else {
-				player.setState(PlayerState.JUMP_LEFT);
-			}
-		}
-		
-		return new Point(finalX, finalY);
+		player.handleCollisions(leftCollision, rightCollision, bottomCollision, topCollision);
 	}
 	
-	private Float leftCollision(float velocityX, float newX, float oldY) {
-		if(velocityX > 0) return null;
-		
+	private Float leftCollision(float newX, float oldY) {
 		float leftX = newX - playerWidth / 2 - 2;
 		float topY = oldY - playerHeight / 2;
 		float bottomY = oldY + playerHeight / 2;
@@ -164,7 +92,7 @@ public class World {
 		boolean leftBlocked = tileMap.isBlocked(topLeft) || tileMap.isBlocked(bottomLeft);
 		
 		if(leftBlocked) {
-			float adjustedPosition = ((int) leftX / tileSize) * tileSize + tileSize + player.getWidth() / 2 + 1; 
+			float adjustedPosition = ((int) leftX / tileSize) * tileSize + tileSize + player.getWidth() / 2 + 1;
 			return adjustedPosition;
 		}
 		else {
@@ -172,9 +100,7 @@ public class World {
 		}
 	}
 	
-	private Float rightCollision(float velocityX, float newX, float oldY) {
-		if(velocityX < 0)  return null;
-		
+	private Float rightCollision(float newX, float oldY) {
 		float rightX = newX + playerWidth / 2;
 		float topY = oldY - playerHeight / 2;
 		float bottomY = oldY + playerHeight / 2;
@@ -193,9 +119,7 @@ public class World {
 		}
 	}
 	
-	private Float bottomCollision(float velocityY, float oldX, float newY) {
-		if(velocityY < 0) return null;
-		
+	private Float bottomCollision(float oldX, float newY) {
 		float leftX = oldX - playerWidth / 2;
 		float rightX = oldX + playerWidth / 2 - 1;
 		float bottomY = newY + playerHeight / 2 + 1;
@@ -214,9 +138,7 @@ public class World {
 		}
 	}
 	
-	private Float topCollision(float velocityY, float oldX, float newY) {
-		if(velocityY > 0) return null;
-		
+	private Float topCollision(float oldX, float newY) {
 		float leftX = oldX - playerWidth / 2;
 		float rightX = oldX + playerWidth / 2 - 1;
 		float topY = newY - playerHeight / 2;

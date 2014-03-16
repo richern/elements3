@@ -36,7 +36,7 @@ public class PlayState extends BasicGameState {
 	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
 		try {
-			world = new World(new Level("camera_test", new CollisionMap("resources/tilemaps/camera_test.tmx"), new Point(32, 576)));
+			world = new World(new Level("camera_test", new CollisionMap("resources/tilemaps/ezpz.tmx"), new Point(64, 32)));
 		}
 		catch(Exception e) {
 			e.printStackTrace();

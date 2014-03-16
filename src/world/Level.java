@@ -2,6 +2,7 @@ package world;
 
 import java.util.ArrayList;
 
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
@@ -17,6 +18,10 @@ public class Level {
 		this.id = id;
 		this.tileMap = tileMap;
 		this.playerSpawn = playerSpawn;
+	}
+	
+	public void render(int x, int y) {
+		tileMap.render(x, y, 0);
 	}
 		
 	public String getId() {

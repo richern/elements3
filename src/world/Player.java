@@ -45,6 +45,7 @@ public class Player {
 	private float y;
 	private float dx;
 	private float dy;
+	private float ddx;
 	
 	boolean left;
 	boolean right;
@@ -124,12 +125,14 @@ public class Player {
 		up = up ^ upKey;
 		
 		if(left && right || !left && !right) idle(time);
-		if(left) moveLeft(time);
-		if(right) moveRight(time);
-		if(up) jump(time);
-		if(!up) notJumping(time);
-				
+		if(left) 	moveLeft(time);
+		if(right) 	moveRight(time);
+		if(up) 		jump(time);
+		if(!up) 	notJumping(time);
 		gravity(time);
+		
+		x  = x + dx * time;
+		y  = y + dy * time;
 	}
 	
 	public void update(Point playerPosition) {
@@ -139,6 +142,7 @@ public class Player {
 	
 	public void idle(float time) {
 		if(isOnFloor) {
+			ddx = 0;
 			dx = 0;
 		}
 	}
@@ -151,8 +155,9 @@ public class Player {
 			wallTime = 0;
 			float minVelocity = -MAX_SPEED;
 			float newdx = dx > 0 && isOnFloor ? 0 : dx;
-			
-			newdx -= ACCELERATION * time;
+			ddx = -ACCELERATION;
+	
+			newdx += ddx * time;
 			newdx = newdx < minVelocity ? minVelocity : newdx;
 			
 			dx = newdx;
@@ -167,8 +172,9 @@ public class Player {
 			wallTime = 0;
 			float maxVelocity = MAX_SPEED;
 			float newdx = dx < 0 && isOnFloor ? 0 : dx;
+			ddx = ACCELERATION;
 			
-			newdx += ACCELERATION * time;
+			newdx += ddx * time;
 			newdx = newdx > maxVelocity ? maxVelocity : newdx;
 			
 			dx = newdx;
@@ -210,49 +216,64 @@ public class Player {
 		newdy = newdy > maxFallSpeed ? maxFallSpeed : newdy;
 		dy = newdy;
 	}
+	
+	public void handleCollisions(Float leftCollision, Float rightCollision, Float bottomCollision, Float topCollision) {
+		Float horizontalCollision = leftCollision == null ? ( rightCollision == null ? null : rightCollision) : leftCollision;
+		Float verticalCollision = bottomCollision == null ? ( topCollision == null ? null : topCollision) : bottomCollision;
+		boolean isLeftCollision = leftCollision != null;
+		boolean isRightCollision = rightCollision != null;
+		boolean isBottomCollision = bottomCollision != null;
+		boolean isTopCollision = topCollision != null;
+		boolean isHorizontalCollision = horizontalCollision != null;
+		boolean isVerticalCollision = verticalCollision != null;
+		boolean isNoCollision = !isHorizontalCollision && !isVerticalCollision; 
 		
-	// getters & setters
-	public float getWidth() {
-		return WIDTH;
-	}
-	
-	public float getHeight() {
-		return HEIGHT;
-	}
-	
-	public Point getPosition() {
-		return new Point(x, y);
-	}
-	
-	public void setPosition(Point p) {
-		float newX = p.getX();
-		float newY = p.getY();
+		if(isHorizontalCollision) {
+			x = horizontalCollision;
+			dx = 0;
+			restoreJump();
+		}
 		
-		positionChanged = x != newX || y != newY;
-		x = newX;
-		y = newY;
-	}
-	
-	public Vector2f getVelocity() {
-		return new Vector2f(dx, dy);
-	}
-	
-	public void setDx(float dx) {
-		this.dx = dx;
-	}
-	
-	public void setDy(float dy) {
-		this.dy = dy;
-	}
-	
-	public Rectangle getRectangle() {
-		float topLeftX = x - WIDTH / 2;
-		float topLeftY = y - HEIGHT / 2;
-		return new Rectangle(topLeftX, topLeftY, WIDTH, HEIGHT);
+		if(isVerticalCollision) {
+			y = verticalCollision;
+			dy = 0;
+			if(isBottomCollision)
+				restoreJump();
+		}
+		
+		if(isNoCollision) {
+			removeJump();
+		}
+		
+		/*IDLE_LEFT, IDLE_RIGHT,
+		WALK_LEFT, WALK_RIGHT,
+		JUMP_LEFT, JUMP_RIGHT,
+		WALL_LEFT, WALL_RIGHT;*/
+		if(isBottomCollision) {
+			if(dx > 0)			
+				state = PlayerState.WALK_RIGHT;
+			else if(dx < 0) 	
+				state = PlayerState.WALK_LEFT;
+			else if(state.isFacingLeft())
+				state = PlayerState.IDLE_LEFT;
+			else
+				state = PlayerState.IDLE_RIGHT;
+		}
+		else if(isLeftCollision) {
+				state = PlayerState.WALL_LEFT;
+		}
+		else if(isRightCollision) {
+				state = PlayerState.WALL_RIGHT;
+		}
+		else {
+			if(ddx < 0 || ddx == 0 && state.isFacingLeft())
+				state = PlayerState.JUMP_LEFT;
+			else
+				state = PlayerState.JUMP_RIGHT;
+		}
 	}
 	
 	public void render(Graphics graphics) {
-		//graphics.scale(32f/192f, 32f/192f);
 		float topLeftX = x - WIDTH / 2;
 		float topLeftY = y - HEIGHT / 2;
 		
@@ -282,6 +303,55 @@ public class Player {
 			graphics.drawAnimation(wallingRight, topLeftX, topLeftY);
 			break;
 		}
+		//graphics.draw(getRectangle());
+	}
+		
+	// getters & setters
+	public float getWidth() {
+		return WIDTH;
+	}
+	
+	public float getHeight() {
+		return HEIGHT;
+	}
+	
+	public float getX() {
+		return x;
+	}
+	
+	public float getY() {
+		return y;
+	}
+	
+	public float getDx() {
+		return dx;
+	}
+	
+	public float getDy() {
+		return dy;
+	}
+	
+	public Point getPosition() {
+		return new Point(x, y);
+	}
+	
+	public void setPosition(Point p) {
+		float newX = p.getX();
+		float newY = p.getY();
+		
+		positionChanged = x != newX || y != newY;
+		x = newX;
+		y = newY;
+	}
+	
+	public Vector2f getVelocity() {
+		return new Vector2f(dx, dy);
+	}
+	
+	public Rectangle getRectangle() {
+		float topLeftX = x - WIDTH / 2;
+		float topLeftY = y - HEIGHT / 2;
+		return new Rectangle(topLeftX, topLeftY, WIDTH, HEIGHT);
 	}
 	
 	public void restoreJump() {
