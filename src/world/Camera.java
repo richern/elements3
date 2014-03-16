@@ -20,11 +20,9 @@ public class Camera {
 	private float camX;
 	private float camY;
 	
-	private CollisionMap tileMap;
 	private Player player;
 	
 	public Camera(CollisionMap tileMap, Player player) {
-		this.tileMap = tileMap;
 		this.TILEMAP_WIDTH = tileMap.getWidth() * tileMap.getTileSize();
 		this.TILEMAP_HEIGHT = tileMap.getHeight() * tileMap.getTileSize();
 		this.PADDING_X = (CAM_WIDTH - TILEMAP_WIDTH) / 2;

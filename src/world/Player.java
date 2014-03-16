@@ -225,35 +225,27 @@ public class Player {
 		dy = newdy;
 	}
 	
-	public void handleCollisions(Float leftCollision, Float rightCollision, Float bottomCollision, Float topCollision) {
-		Float horizontalCollision = leftCollision == null ? ( rightCollision == null ? null : rightCollision) : leftCollision;
-		Float verticalCollision = bottomCollision == null ? ( topCollision == null ? null : topCollision) : bottomCollision;
-		boolean isLeftCollision = leftCollision != null;
-		boolean isRightCollision = rightCollision != null;
-		boolean isBottomCollision = bottomCollision != null;
-		boolean isTopCollision = topCollision != null;
-		boolean isHorizontalCollision = horizontalCollision != null;
-		boolean isVerticalCollision = verticalCollision != null;
-		boolean isNoCollision = !isHorizontalCollision && !isVerticalCollision; 
-		
-		if(isHorizontalCollision) {
-			x = horizontalCollision;
+	public void handleCollisions(Collision collision) {
+		if(collision.isHorizontalCollision) {
+			x = collision.horizontalCollision;
 			dx = 0;
 			restoreJump();
 		}
 		
-		if(isVerticalCollision) {
-			y = verticalCollision;
+		if(collision.isVerticalCollision) {
+			y = collision.verticalCollision;
 			dy = 0;
-			if(isBottomCollision)
+			if(collision.isBottomCollision)
 				restoreJump();
+			if(collision.isTopCollision)
+				System.out.println("top collision");
 		}
 		
-		if(isNoCollision) {
+		if(collision.isNoCollision) {
 			removeJump();
 		}
 		
-		if(isBottomCollision) {
+		if(collision.isBottomCollision) {
 			if(dx > 0)			
 				state = PlayerState.WALK_RIGHT;
 			else if(dx < 0) 	
@@ -263,10 +255,10 @@ public class Player {
 			else
 				state = PlayerState.IDLE_RIGHT;
 		}
-		else if(isLeftCollision) {
+		else if(collision.isLeftCollision) {
 				state = PlayerState.WALL_LEFT;
 		}
-		else if(isRightCollision) {
+		else if(collision.isRightCollision) {
 				state = PlayerState.WALL_RIGHT;
 		}
 		else {

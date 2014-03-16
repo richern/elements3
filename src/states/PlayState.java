@@ -36,7 +36,7 @@ public class PlayState extends BasicGameState {
 	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
 		try {
-			world = new World(new Level("camera_test", new CollisionMap("resources/tilemaps/96.tmx"), new Point(384, 1440)));
+			world = new World(new Level(0, "96", new CollisionMap("resources/tilemaps/96.tmx")));
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -47,7 +47,6 @@ public class PlayState extends BasicGameState {
 		initInput(globalInput);
 	}
 
-	@SuppressWarnings("incomplete-switch")
 	@Override
 	public void update(GameContainer container, StateBasedGame sbg, int delta)
 			throws SlickException {

@@ -46,8 +46,8 @@ public class World {
 	
 	public void update(HashMap<Integer, Boolean> input, float time) {
 		oldPlayerPosition = player.getPosition();
-		player.update(input, time);
 		checkCollision();
+		player.update(input, time);
 		camera.update();
 	}
 	
@@ -74,21 +74,24 @@ public class World {
 	}
 	
 	public void checkCollision() {
-		float oldX = oldPlayerPosition.getX();
-		float oldY = oldPlayerPosition.getY();
 		float velocityX = player.getDx();
 		float velocityY = player.getDy();
+		float oldX = oldPlayerPosition.getX();
+		float oldY = oldPlayerPosition.getY();
 		float newX = player.getX();
 		float newY = player.getY();
-
-		//compare with tile map
-		// have to compare x and y directions separately
-		Float leftCollision 	= velocityX > 0 ? null : leftCollision(newX, oldY);
-		Float rightCollision 	= velocityX < 0 ? null : rightCollision(newX, oldY);
-		Float bottomCollision 	= velocityY < 0 ? null : bottomCollision(oldX, newY);
-		Float topCollision 		= velocityY > 0 ? null : topCollision(oldX, newY);
 		
-		player.handleCollisions(leftCollision, rightCollision, bottomCollision, topCollision);
+		Float leftCollision   = velocityX > 0 ? null : leftCollision(newX, oldY);
+		Float rightCollision  = velocityX < 0 ? null : rightCollision(newX, oldY);
+		Float bottomCollision = velocityY < 0 ? null : bottomCollision(oldX, newY);
+		Float topCollision 	  = velocityY > 0 ? null : topCollision(oldX, newY);
+		Collision collision = new Collision(leftCollision, rightCollision, topCollision, bottomCollision);
+		
+		notifyCollision(collision);
+	}
+	
+	public void notifyCollision(Collision collision) {
+		player.handleCollisions(collision);
 	}
 	
 	private Float leftCollision(float newX, float oldY) {
@@ -151,7 +154,7 @@ public class World {
 	private Float topCollision(float oldX, float newY) {
 		float leftX = oldX - playerWidth / 2;
 		float rightX = oldX + playerWidth / 2 - 1;
-		float topY = newY - playerHeight / 2;
+		float topY = newY - playerHeight / 2 - 1;
 		
 		Point topLeft = new Point(leftX, topY);
 		Point topRight = new Point(rightX, topY);

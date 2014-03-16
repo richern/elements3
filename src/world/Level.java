@@ -1,39 +1,33 @@
 package world;
 
-import java.util.ArrayList;
-
-import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Point;
-import org.newdawn.slick.geom.Rectangle;
-import org.newdawn.slick.geom.Vector2f;
-import org.newdawn.slick.tiled.TiledMap;
 
 public class Level {
 	
-	private String id;
+	private int id;
+	private String name;
 	private CollisionMap tileMap;
-	private Point playerSpawn;
 	
-	public Level(String id, CollisionMap tileMap, Point playerSpawn) {
+	public Level(int id, String name, CollisionMap tileMap) {
 		this.id = id;
+		this.name = name;
 		this.tileMap = tileMap;
-		this.playerSpawn = playerSpawn;
 	}
 	
-	public void render(int x, int y) {
-		tileMap.render(x, y, 0);
-	}
-		
-	public String getId() {
+	public int getId() {
 		return id;
+	}
+	
+	public Point getPlayerSpawn() {
+		return tileMap.getPlayerSpawn();
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public CollisionMap getTileMap() {
 		return tileMap;
-	}
-	
-	public Point getPlayerSpawn() {
-		return playerSpawn;
 	}
 	
 }
