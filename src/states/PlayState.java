@@ -19,7 +19,6 @@ import com.esotericsoftware.kryonet.Listener;
 import enums.GameRole;
 import enums.GameState;
 import util.GlobalInput;
-import world.CollisionMap;
 import world.Level;
 import world.Player;
 import world.World;
@@ -36,7 +35,7 @@ public class PlayState extends BasicGameState {
 	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
 		try {
-			world = new World(new Level(0, "96", new CollisionMap("resources/tilemaps/96.tmx")));
+			world = new World(new Level(0, "96", "resources/tilemaps/96.tmx"));
 		}
 		catch(Exception e) {
 			e.printStackTrace();

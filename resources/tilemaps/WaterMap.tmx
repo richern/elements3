@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="75" height="75" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="key" tilewidth="32" tileheight="32">
+  <image source="../images/key.png" width="96" height="96"/>
+ </tileset>
+ <tileset firstgid="10" name="chest" tilewidth="32" tileheight="32">
+  <image source="../images/chest.png" width="96" height="96"/>
+ </tileset>
+ <tileset firstgid="19" source="../tilesets/ground96.tsx"/>
+ <tileset firstgid="20" name="bubble" tilewidth="32" tileheight="32">
+  <image source="../images/bubble.png" width="96" height="96"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="75" height="75">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+2XwW4DIQxEk2uuSZsm6f9/ZzkiVBDY2IxhnmRlDxuDxh7DXi6EkN14pPhK8b16IwF4pvhJ8VqwdrQ6vVN8UvwuWHtlnTyZ0ROedbpl4U20nrgVv56s9K6ElX0ViXxetJ6jnTUWUKt+8tnaeo42g0fp6YV8traeo83gUTx7IbpHPXthd4/OBNmj0XveE/Z8P8g9X0PjhdN8pPHCaT7SeCGij07mtDmgAWkOoNcNaQ4g1Q0dpLoRQsipWJ7xFrlX3kksz3iL3D05r1nMxPKMt8jdk/Na/JI6Vn21I8jfWWh7Q/7OQtsb8nfWzL2h9SgyCD0apV4I/kGoVxQQ6nUaUbyMAL3cj9TLjyLYm3WeRbA367yLOP2cuRdB6nhptcO8u1eeZ7PDvPPSKuK8Kz3npdUsPL3c0iOCVlIvSzSOrpXUyxKNo2slRaIxmlbI97vZWmlnLZo+ObO10t6bTtJKe286SSst1KofatVPbc3/vi8kMbKPkf9r15NgmX9UK8/10PJTK5vc1MrmXcscq/JTK5vc1Mrm3VYO7V1m1h1oFG+tetdBu+OOrkutbN7VQK3G1pmt1R+lATvs5FcAAA==
+  </data>
+ </layer>
+</map>

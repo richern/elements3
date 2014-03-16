@@ -20,9 +20,7 @@ import com.esotericsoftware.kryonet.Server;
 import enums.GameState;
 import states.*;
 import util.Dimension;
-import world.CollisionMap;
 import world.Level;
-import world.CollisionMap.TileNotSquareException;
 
 public class Game extends StateBasedGame {
 	

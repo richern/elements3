@@ -2,6 +2,7 @@ package world;
 
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.tiled.TiledMap;
 
 import main.Game;
 
@@ -22,9 +23,9 @@ public class Camera {
 	
 	private Player player;
 	
-	public Camera(CollisionMap tileMap, Player player) {
-		this.TILEMAP_WIDTH = tileMap.getWidth() * tileMap.getTileSize();
-		this.TILEMAP_HEIGHT = tileMap.getHeight() * tileMap.getTileSize();
+	public Camera(Level level, Player player) {
+		this.TILEMAP_WIDTH = level.getWidth() * level.getTileSize();
+		this.TILEMAP_HEIGHT = level.getHeight() * level.getTileSize();
 		this.PADDING_X = (CAM_WIDTH - TILEMAP_WIDTH) / 2;
 		this.PADDING_Y = (CAM_HEIGHT - TILEMAP_HEIGHT) / 2;
 		

@@ -23,7 +23,7 @@ public class Player {
 	// The world will check for collision and set position
 	
 	private static final float COLLISION_WIDTH = 60;
-	private static final float COLLISION_HEIGHT = 96;
+	private static final float COLLISION_HEIGHT = 90;
 	private static final int SPRITE_WIDTH = 96;
 	private static final int SPRITE_HEIGHT = 96;
 	
@@ -48,8 +48,6 @@ public class Player {
 	private float dx;
 	private float dy;
 	private float ddx;
-	private float oldX;
-	private float oldY;
 	
 	boolean left;
 	boolean right;
@@ -62,12 +60,13 @@ public class Player {
 	private float wallTime;
 	
 	private PlayerState state;
-	private boolean isOnFloor;
-	private boolean isInAir;
-	private boolean isOnLeftWall;
-	private boolean isOnRightWall;
 	
 	private boolean positionChanged; // lets camera know to update
+	
+	Float leftCollision;
+	Float rightCollision;
+	Float bottomCollision;
+	Float topCollision;
 	
 	SpriteSheet spritesheet;
 	Animation idlingLeft;
@@ -84,8 +83,6 @@ public class Player {
 		this.y = position.getY();
 		this.dx = 0;
 		this.dy = 0;
-		this.oldX = x;
-		this.oldY = y;
 		
 		this.left = false;
 		this.right = false;
@@ -98,10 +95,6 @@ public class Player {
 		this.wallTime = 0;
 		
 		this.state = PlayerState.IDLE_RIGHT;
-		this.isOnFloor = false;
-		this.isInAir = false;
-		this.isOnLeftWall = false;
-		this.isOnRightWall = false;
 		
 		this.positionChanged = false;
 		
@@ -117,11 +110,6 @@ public class Player {
 	}
 
 	public void update(HashMap<Integer, Boolean> input, float time) {
-		isOnFloor = state.isOnFloor();
-		isInAir = state.isInAir();
-		isOnLeftWall = state.isOnLeftWall();
-		isOnRightWall = state.isOnRightWall();
-
 		boolean leftKey = input.get(Input.KEY_LEFT);
 		boolean rightKey = input.get(Input.KEY_RIGHT);
 		boolean upKey = input.get(Input.KEY_UP);
@@ -137,10 +125,7 @@ public class Player {
 		if(!up) 	notJumping(time);
 		gravity(time);
 		
-		oldX = x;
-		oldY = y;
-		x = x + dx * time;
-		y = y + dy * time;
+		positionChanged = false;
 	}
 	
 	public void update(Point playerPosition) {
@@ -149,20 +134,20 @@ public class Player {
 	}
 	
 	public void idle(float time) {
-		if(isOnFloor) {
+		if(state.isOnGround()) {
 			ddx = 0;
 			dx = 0;
 		}
 	}
 
 	public void moveLeft(float time) {
-		if(isOnRightWall && wallTime < MAX_WALL_TIME) {
+		if(state.isOnRightWall() && wallTime < MAX_WALL_TIME) {
 			wallTime += time * 1000.0f;
 		}
 		else {
 			wallTime = 0;
 			float minVelocity = -MAX_SPEED;
-			float newdx = dx > 0 && isOnFloor ? 0 : dx;
+			float newdx = dx > 0 && state.isOnGround() ? 0 : dx;
 			ddx = -ACCELERATION;
 	
 			newdx += ddx * time;
@@ -173,13 +158,13 @@ public class Player {
 	}
 	
 	public void moveRight(float time) {
-		if(isOnLeftWall && wallTime < MAX_WALL_TIME) {
+		if(state.isOnLeftWall() && wallTime < MAX_WALL_TIME) {
 			wallTime += time * 1000.0f;
 		}
 		else {
 			wallTime = 0;
 			float maxVelocity = MAX_SPEED;
-			float newdx = dx < 0 && isOnFloor ? 0 : dx;
+			float newdx = dx < 0 && state.isOnGround() ? 0 : dx;
 			ddx = ACCELERATION;
 			
 			newdx += ddx * time;
@@ -191,9 +176,9 @@ public class Player {
 	
 	public void jump(float time) {
 		if(hasJump && jumpReleased) {
-			if(isOnLeftWall)
+			if(state.isOnLeftWall())
 				dx = WALL_JUMP_SPEED;
-			else if(isOnRightWall)
+			else if(state.isOnRightWall())
 				dx = -WALL_JUMP_SPEED;
 			jumpReleased = false;
 			hasJump = false;
@@ -216,7 +201,7 @@ public class Player {
 	}
 	
 	public void gravity(float time) {
-		boolean wall = isOnLeftWall || isOnRightWall;
+		boolean wall = state.isOnWall();
 		float gravity = wall ? WALL_GRAVITY : GRAVITY;
 		float maxFallSpeed = wall ? WALL_SLIDE_SPEED : MAX_FALL_SPEED;
 		
@@ -225,54 +210,34 @@ public class Player {
 		dy = newdy;
 	}
 	
-	public void handleCollisions(Collision collision) {
-		if(collision.isHorizontalCollision) {
-			x = collision.horizontalCollision;
-			dx = 0;
-			restoreJump();
+	public void updateState(Float leftCollision, Float rightCollision, Float bottomCollision, Float topCollision) {
+		boolean noCollision = leftCollision == null && rightCollision == null
+				&& bottomCollision == null && topCollision == null;
+		if(noCollision)	{
+			if(ddx > 0) 
+				 state = PlayerState.JUMP_RIGHT;
+			else state = PlayerState.JUMP_LEFT;
 		}
-		
-		if(collision.isVerticalCollision) {
-			y = collision.verticalCollision;
-			dy = 0;
-			if(collision.isBottomCollision)
-				restoreJump();
-			if(collision.isTopCollision)
-				System.out.println("top collision");
-		}
-		
-		if(collision.isNoCollision) {
-			removeJump();
-		}
-		
-		if(collision.isBottomCollision) {
-			if(dx > 0)			
+		if(bottomCollision != null) {
+			if(dx > 0)
 				state = PlayerState.WALK_RIGHT;
-			else if(dx < 0) 	
+			else if(dx < 0)
 				state = PlayerState.WALK_LEFT;
-			else if(state.isFacingLeft())
-				state = PlayerState.IDLE_LEFT;
-			else
+			else if(state.isFacingRight())
 				state = PlayerState.IDLE_RIGHT;
-		}
-		else if(collision.isLeftCollision) {
-				state = PlayerState.WALL_LEFT;
-		}
-		else if(collision.isRightCollision) {
-				state = PlayerState.WALL_RIGHT;
-		}
-		else {
-			if(ddx < 0 || ddx == 0 && state.isFacingLeft())
-				state = PlayerState.JUMP_LEFT;
 			else
-				state = PlayerState.JUMP_RIGHT;
+				state = PlayerState.IDLE_LEFT;
 		}
+		else if(leftCollision != null) 
+			state = PlayerState.WALL_LEFT;
+		else if(rightCollision != null) 
+			state = PlayerState.WALL_RIGHT;
 	}
 	
 	public void render(Graphics graphics) {
 		float topLeftX = x - SPRITE_WIDTH / 2;
 		float topLeftY = y - SPRITE_HEIGHT / 2;
-		
+
 		Animation animation = new Animation();
 		switch(state) {
 		case IDLE_LEFT:
@@ -333,6 +298,26 @@ public class Player {
 		return new Point(x, y);
 	}
 	
+	public void setX(float x) {
+		if(this.x != x)
+			positionChanged = true;
+		this.x = x;
+	}
+	
+	public void setY(float y) {
+		if(this.y != y)
+			positionChanged = true;
+		this.y = y;
+	}
+	
+	public void setDx(float dx) {
+		this.dx = dx;
+	}
+	
+	public void setDy(float dy) {
+		this.dy = dy;
+	}
+	
 	public Vector2f getVelocity() {
 		return new Vector2f(dx, dy);
 	}
@@ -363,7 +348,7 @@ public class Player {
 	}
 	
 	public boolean isPositionChanged() {
-		return oldX != x || oldY != y;
+		return positionChanged;
 	}
  
 }

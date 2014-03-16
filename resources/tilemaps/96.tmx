@@ -12,7 +12,8 @@
  </tileset>
  <layer name="Tile Layer 1" width="20" height="20">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC2NgGHqAcQiZx0gEHkj3UcO+UfNGzSPXPCYkTK55IMBMpH30BMTkfXLKg8EEALm7KmRABgAA
+   H4sIAAAAAAAAC2NgGHqAcQiZx0gEHkj3UcO+UfNGzSPXPCYkTIl5zETaR6x51ADE5H1yyoPBBAA1VDPxQAYAAA==
   </data>
  </layer>
+ <objectgroup name="Object Layer 1" width="20" height="20"/>
 </map>

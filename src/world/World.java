@@ -1,23 +1,10 @@
 package world;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.geom.Line;
 import org.newdawn.slick.geom.Point;
-import org.newdawn.slick.geom.Rectangle;
-import org.newdawn.slick.geom.Shape;
-import org.newdawn.slick.geom.Vector2f;
-import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.tiled.TiledMap;
-
-import enums.GameRole;
-import enums.PlayerState;
-import util.GlobalInput;
 
 public class World {
 	
@@ -27,39 +14,33 @@ public class World {
 	private Camera camera;
 	
 	// util
-	private CollisionMap tileMap;
 	private int tileSize;
-	private Point oldPlayerPosition;
 	private float playerWidth;
 	private float playerHeight;
 	
  	public World(Level level) throws SlickException {
  		this.level = level;
-		this.tileMap = level.getTileMap();
 		this.player = new Player(level.getPlayerSpawn());
-		this.camera = new Camera(tileMap, player);
+		this.camera = new Camera(level, player);
 		
-		this.tileSize = tileMap.getTileSize();
+		this.tileSize = level.getTileSize();
 		playerWidth = player.getWidth();
 		playerHeight = player.getHeight();
 	}
 	
 	public void update(HashMap<Integer, Boolean> input, float time) {
-		oldPlayerPosition = player.getPosition();
-		checkCollision();
 		player.update(input, time);
+		checkCollision(time);
 		camera.update();
 	}
 	
 	public void update(Point playerPosition) {
-		oldPlayerPosition = player.getPosition();
 		player.update(playerPosition);
 		camera.update();
 	}
 	
 	public void update(float time) {
-		oldPlayerPosition = player.getPosition();
-		checkCollision();
+		checkCollision(time);
 		camera.update();
 	}
 	 
@@ -67,31 +48,54 @@ public class World {
 		int offsetX = camera.getOffsetX();
 		int offsetY = camera.getOffsetY();
 		
-		tileMap.render(offsetX, offsetY);
+		level.render(offsetX, offsetY);
 		graphics.translate(offsetX, offsetY);
 		player.render(graphics);
 		graphics.draw(player.getRectangle());
 	}
 	
-	public void checkCollision() {
+	public void checkCollision(float time) {
 		float velocityX = player.getDx();
 		float velocityY = player.getDy();
-		float oldX = oldPlayerPosition.getX();
-		float oldY = oldPlayerPosition.getY();
-		float newX = player.getX();
-		float newY = player.getY();
+		float oldX 		= player.getX();
+		float oldY 		= player.getY();
+		float newX 		= oldX + velocityX * time;
+		float newY 		= oldY + velocityY * time;
 		
 		Float leftCollision   = velocityX > 0 ? null : leftCollision(newX, oldY);
 		Float rightCollision  = velocityX < 0 ? null : rightCollision(newX, oldY);
-		Float bottomCollision = velocityY < 0 ? null : bottomCollision(oldX, newY);
+		Float bottomCollision = velocityY < 0 ? null : bottomCollision(oldX, newY, time);
 		Float topCollision 	  = velocityY > 0 ? null : topCollision(oldX, newY);
-		Collision collision = new Collision(leftCollision, rightCollision, topCollision, bottomCollision);
 		
-		notifyCollision(collision);
-	}
-	
-	public void notifyCollision(Collision collision) {
-		player.handleCollisions(collision);
+		if(bottomCollision != null) {
+			player.restoreJump();
+			player.setDy(0);
+			player.setY(bottomCollision);
+		}
+		else if(topCollision != null) { 
+			player.setDy(0);
+			player.setY(topCollision);
+		}
+		else {
+			player.removeJump();
+			player.setY(newY);
+		}
+		
+		if(leftCollision != null) {
+			player.restoreJump();
+			player.setDx(0);
+			player.setX(leftCollision);
+		}
+		else if(rightCollision != null) {
+			player.restoreJump();
+			player.setDx(0);
+			player.setX(rightCollision);
+		}
+		else {
+			player.setX(newX);
+		}
+		
+		player.updateState(leftCollision, rightCollision, bottomCollision, topCollision);
 	}
 	
 	private Float leftCollision(float newX, float oldY) {
@@ -102,7 +106,7 @@ public class World {
 		Point topLeft = new Point(leftX, topY);
 		Point bottomLeft = new Point(leftX, bottomY);
 		
-		boolean leftBlocked = tileMap.isBlocked(topLeft) || tileMap.isBlocked(bottomLeft);
+		boolean leftBlocked = level.isBlocked(topLeft) || level.isBlocked(bottomLeft);
 		
 		if(leftBlocked) {
 			float adjustedPosition = ((int) leftX / tileSize) * tileSize + tileSize + player.getWidth() / 2 + 1;
@@ -121,7 +125,7 @@ public class World {
 		Point topRight = new Point(rightX, topY);
 		Point bottomRight = new Point(rightX, bottomY);
 		
-		boolean rightBlocked = tileMap.isBlocked(topRight) || tileMap.isBlocked(bottomRight);
+		boolean rightBlocked = level.isBlocked(topRight) || level.isBlocked(bottomRight);
 		
 		if(rightBlocked) {
 			float adjustedPosition = ((int) rightX / tileSize) * tileSize - player.getWidth() / 2;
@@ -132,7 +136,7 @@ public class World {
 		}
 	}
 	
-	private Float bottomCollision(float oldX, float newY) {
+	private Float bottomCollision(float oldX, float newY, float time) {
 		float leftX = oldX - playerWidth / 2;
 		float rightX = oldX + playerWidth / 2 - 1;
 		float bottomY = newY + playerHeight / 2 + 1;
@@ -140,7 +144,7 @@ public class World {
 		Point bottomLeft = new Point(leftX, bottomY);
 		Point bottomRight = new Point(rightX, bottomY);
 		
-		boolean bottomBlocked = tileMap.isBlocked(bottomLeft) || tileMap.isBlocked(bottomRight);
+		boolean bottomBlocked = level.isBlocked(bottomLeft) || level.isBlocked(bottomRight);
 		
 		if(bottomBlocked) {
 			float adjustedPosition = ((int) bottomY / tileSize) * tileSize - player.getHeight() / 2 - 1;
@@ -154,12 +158,12 @@ public class World {
 	private Float topCollision(float oldX, float newY) {
 		float leftX = oldX - playerWidth / 2;
 		float rightX = oldX + playerWidth / 2 - 1;
-		float topY = newY - playerHeight / 2 - 1;
+		float topY = newY - playerHeight / 2;
 		
 		Point topLeft = new Point(leftX, topY);
 		Point topRight = new Point(rightX, topY);
 		
-		boolean topBlocked = tileMap.isBlocked(topLeft) || tileMap.isBlocked(topRight);
+		boolean topBlocked = level.isBlocked(topLeft) || level.isBlocked(topRight);
 		
 		if(topBlocked) {
 			float adjustedPosition = ((int) topY / tileSize) * tileSize + tileSize + player.getHeight() / 2;
