@@ -90,7 +90,7 @@ public class PlayState extends BasicGameState {
 	@Override
 	public void render(GameContainer container, StateBasedGame sbg, Graphics graphics)
 			throws SlickException {
-		graphics.scale((float) 640/1920, (float) 360/1080);
+		//graphics.scale((float) 640/1920, (float) 360/1080);
 		world.render(graphics);
 	}
 	
