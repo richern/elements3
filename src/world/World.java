@@ -22,17 +22,19 @@ import util.GlobalInput;
 public class World {
 	
 	// fields
-	private CollisionMap tileMap;
+	private Level level;
 	private Player player;
 	private Camera camera;
 	
 	// util
+	private CollisionMap tileMap;
 	private int tileSize;
 	private Point oldPlayerPosition;
 	private float playerWidth;
 	private float playerHeight;
 	
  	public World(Level level) throws SlickException {
+ 		this.level = level;
 		this.tileMap = level.getTileMap();
 		this.player = new Player(level.getPlayerSpawn());
 		this.camera = new Camera(tileMap, player);
@@ -62,7 +64,13 @@ public class World {
 	}
 	 
 	public void render(Graphics graphics) {
-		camera.render(graphics);
+		int offsetX = camera.getOffsetX();
+		int offsetY = camera.getOffsetY();
+		
+		tileMap.render(offsetX, offsetY);
+		graphics.translate(offsetX, offsetY);
+		player.render(graphics);
+		graphics.draw(player.getRectangle());
 	}
 	
 	public void checkCollision() {

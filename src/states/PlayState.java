@@ -91,7 +91,8 @@ public class PlayState extends BasicGameState {
 	public void render(GameContainer container, StateBasedGame sbg, Graphics graphics)
 			throws SlickException {
 		//graphics.scale((float) 640/1920, (float) 360/1080);
-		graphics.scale((float) container.getScreenWidth() / 1920f, (float) container.getScreenHeight() / 1080f); 
+		//graphics.scale((float) container.getScreenWidth() / 1920f, (float) container.getScreenHeight() / 1080f);
+		graphics.scale((float) container.getWidth() / 1920f, (float) container.getHeight() / 1080f);
 		world.render(graphics);
 	}
 	

@@ -38,17 +38,7 @@ public class Camera {
 		setCenter();
 		adjust();
 	}
-	
-	public void render(Graphics graphics) {
-		int offsetX = (int) -camX;
-		int offsetY = (int) -camY;
 		
-		tileMap.render(offsetX, offsetY);
-		graphics.translate(offsetX, offsetY);
-		player.render(graphics);
-		graphics.draw(player.getRectangle());
-	}
-	
 	public void setCenter() {
 		float playerX = player.getPosition().getX();
 		float playerY = player.getPosition().getY();
@@ -92,11 +82,11 @@ public class Camera {
 		}
 	}
 	
-	public float getOffsetX() {
+	public int getOffsetX() {
 		return (int) -camX;
 	}
 	
-	public float getOffsetY() {
+	public int getOffsetY() {
 		return (int) -camY;
 	}
 	
