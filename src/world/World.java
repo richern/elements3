@@ -50,12 +50,14 @@ public class World {
 	}
 	
 	public void update(Point playerPosition) {
+		oldPlayerPosition = player.getPosition();
 		player.update(playerPosition);
 		camera.update();
 	}
 	
 	public void update(float time) {
-		//correctPlayerPosition(time);
+		oldPlayerPosition = player.getPosition();
+		checkCollision();
 		camera.update();
 	}
 	 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="20" height="20" tilewidth="96" tileheight="96">
+ <tileset firstgid="1" name="ground96" tilewidth="96" tileheight="96">
+  <image source="../../../../Pictures/Elements 3/ground96.png" width="96" height="96"/>
+  <tile id="0">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="20" height="20">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC2NgGAW0BoxY+NgwueZRqoeQeaTaN2re8DaPUvuGm3m47CAVD0UAAB69rKxABgAA
+  </data>
+ </layer>
+</map>

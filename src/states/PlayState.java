@@ -1,7 +1,7 @@
 package states;
 
 import java.util.HashMap;
-
+	
 import main.Game;
 import networking.GameClient;
 import networking.GameServer;
@@ -36,7 +36,7 @@ public class PlayState extends BasicGameState {
 	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
 		try {
-			world = new World(new Level("camera_test", new CollisionMap("resources/tilemaps/ezpz.tmx"), new Point(64, 32)));
+			world = new World(new Level("camera_test", new CollisionMap("resources/tilemaps/96.tmx"), new Point(384, 1440)));
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -90,7 +90,7 @@ public class PlayState extends BasicGameState {
 	@Override
 	public void render(GameContainer container, StateBasedGame sbg, Graphics graphics)
 			throws SlickException {
-		//graphics.scale((float) 640/1920, (float) 360/1080);
+		graphics.scale((float) 640/1920, (float) 360/1080);
 		world.render(graphics);
 	}
 	

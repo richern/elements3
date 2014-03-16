@@ -22,17 +22,19 @@ public class Player {
 	// The player does not set its position, just velocity
 	// The world will check for collision and set position
 	
-	private static final float WIDTH = 32;
-	private static final float HEIGHT = 32;
+	private static final float COLLISION_WIDTH = 60;
+	private static final float COLLISION_HEIGHT = 96;
+	private static final int SPRITE_WIDTH = 96;
+	private static final int SPRITE_HEIGHT = 96;
 	
 	private static final float MAX_SPEED = 600;
 	private static final float ACCELERATION = 1200;
 	private static final float GRAVITY = 1500;
 	private static final float MAX_FALL_SPEED = 1000;
 	
-	private static final float JUMP_SPEED = 400;
+	private static final float JUMP_SPEED = 600;
 	private static final float MIN_JUMP_TIME = 50;
-	private static final float MAX_JUMP_TIME = 200;
+	private static final float MAX_JUMP_TIME = 250;
 	
 	private static final float MAX_WALL_TIME = 500; // time player is stuck to wall when moving in opposite direction
 	private static final float WALL_JUMP_SPEED = MAX_SPEED / 2;
@@ -46,6 +48,8 @@ public class Player {
 	private float dx;
 	private float dy;
 	private float ddx;
+	private float oldX;
+	private float oldY;
 	
 	boolean left;
 	boolean right;
@@ -80,6 +84,8 @@ public class Player {
 		this.y = position.getY();
 		this.dx = 0;
 		this.dy = 0;
+		this.oldX = x;
+		this.oldY = y;
 		
 		this.left = false;
 		this.right = false;
@@ -99,15 +105,15 @@ public class Player {
 		
 		this.positionChanged = false;
 		
-		spritesheet = new SpriteSheet("resources/spritesheets/player.png", 192, 192);
+		spritesheet = new SpriteSheet("resources/spritesheets/player.png", SPRITE_WIDTH, SPRITE_HEIGHT);
 		idlingLeft = new Animation(spritesheet, 2, 0, 2, 0, true, animationSpeed, true);
 		idlingRight = new Animation(spritesheet, 4, 1, 4, 1, true, animationSpeed, true);
 		walkingLeft = new Animation(spritesheet, 3, 0, 4, 0, true, animationSpeed, true);
 		walkingRight = new Animation(spritesheet, 0, 2, 2, 2, true, animationSpeed, true);
 		jumpingLeft = new Animation(spritesheet, 1, 0, 1, 0, true, animationSpeed, true);
 		jumpingRight = new Animation(spritesheet, 3, 1, 3, 1, true, animationSpeed, true);
-		wallingLeft = new Animation(spritesheet, 1, 1, 1, 1, true, animationSpeed, true);
-		wallingRight = new Animation(spritesheet, 3, 2, 3, 2, true, animationSpeed, true);
+		wallingLeft = new Animation(spritesheet, 3, 2, 3, 2, true, animationSpeed, true);
+		wallingRight = new Animation(spritesheet, 1, 1, 1, 1, true, animationSpeed, true);
 	}
 
 	public void update(HashMap<Integer, Boolean> input, float time) {
@@ -131,8 +137,10 @@ public class Player {
 		if(!up) 	notJumping(time);
 		gravity(time);
 		
-		x  = x + dx * time;
-		y  = y + dy * time;
+		oldX = x;
+		oldY = y;
+		x = x + dx * time;
+		y = y + dy * time;
 	}
 	
 	public void update(Point playerPosition) {
@@ -245,10 +253,6 @@ public class Player {
 			removeJump();
 		}
 		
-		/*IDLE_LEFT, IDLE_RIGHT,
-		WALK_LEFT, WALK_RIGHT,
-		JUMP_LEFT, JUMP_RIGHT,
-		WALL_LEFT, WALL_RIGHT;*/
 		if(isBottomCollision) {
 			if(dx > 0)			
 				state = PlayerState.WALK_RIGHT;
@@ -274,45 +278,47 @@ public class Player {
 	}
 	
 	public void render(Graphics graphics) {
-		float topLeftX = x - WIDTH / 2;
-		float topLeftY = y - HEIGHT / 2;
+		float topLeftX = x - SPRITE_WIDTH / 2;
+		float topLeftY = y - SPRITE_HEIGHT / 2;
 		
+		Animation animation = new Animation();
 		switch(state) {
 		case IDLE_LEFT:
-			graphics.drawAnimation(idlingLeft, topLeftX, topLeftY);
+			animation = idlingLeft;
 			break;
 		case IDLE_RIGHT:
-			graphics.drawAnimation(idlingRight, topLeftX, topLeftY);
+			animation = idlingRight;
 			break;
 		case WALK_LEFT:
-			graphics.drawAnimation(walkingLeft, topLeftX, topLeftY);
+			animation = walkingLeft;
 			break;
 		case WALK_RIGHT:
-			graphics.drawAnimation(walkingRight, topLeftX, topLeftY);
+			animation = walkingRight;
 			break;
 		case JUMP_LEFT:
-			graphics.drawAnimation(jumpingLeft, topLeftX, topLeftY);
+			animation = jumpingLeft;
 			break;
 		case JUMP_RIGHT:
-			graphics.drawAnimation(jumpingRight, topLeftX, topLeftY);
+			animation = jumpingRight;
 			break;
 		case WALL_LEFT:
-			graphics.drawAnimation(wallingLeft, topLeftX, topLeftY);
+			animation = wallingLeft;
 			break;
 		case WALL_RIGHT:
-			graphics.drawAnimation(wallingRight, topLeftX, topLeftY);
+			animation = wallingRight;
 			break;
 		}
-		//graphics.draw(getRectangle());
+		
+		graphics.drawAnimation(animation, topLeftX, topLeftY);
 	}
 		
 	// getters & setters
 	public float getWidth() {
-		return WIDTH;
+		return COLLISION_WIDTH;
 	}
 	
 	public float getHeight() {
-		return HEIGHT;
+		return COLLISION_HEIGHT;
 	}
 	
 	public float getX() {
@@ -335,23 +341,14 @@ public class Player {
 		return new Point(x, y);
 	}
 	
-	public void setPosition(Point p) {
-		float newX = p.getX();
-		float newY = p.getY();
-		
-		positionChanged = x != newX || y != newY;
-		x = newX;
-		y = newY;
-	}
-	
 	public Vector2f getVelocity() {
 		return new Vector2f(dx, dy);
 	}
 	
 	public Rectangle getRectangle() {
-		float topLeftX = x - WIDTH / 2;
-		float topLeftY = y - HEIGHT / 2;
-		return new Rectangle(topLeftX, topLeftY, WIDTH, HEIGHT);
+		float topLeftX = x - COLLISION_WIDTH / 2;
+		float topLeftY = y - COLLISION_HEIGHT / 2;
+		return new Rectangle(topLeftX, topLeftY, COLLISION_WIDTH, COLLISION_HEIGHT);
 	}
 	
 	public void restoreJump() {
@@ -374,7 +371,7 @@ public class Player {
 	}
 	
 	public boolean isPositionChanged() {
-		return positionChanged;
+		return oldX != x || oldY != y;
 	}
  
 }
