@@ -1,7 +1,6 @@
 package networking;
 
 import networking.packets.*;
-import util.GlobalInput;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;

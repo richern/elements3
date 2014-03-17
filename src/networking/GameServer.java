@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.newdawn.slick.Input;
-
 import states.PlayState;
-import world.Player;
 import main.Game;
 import networking.packets.*;
 
@@ -16,8 +13,8 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
+import entities.Player;
 import enums.GameRole;
-import enums.GameState;
 
 public class GameServer extends Listener {
 	

@@ -1,7 +1,7 @@
 package enums;
 
 public enum GameState {
-	PLAY(0), MENU(1);
+	MENU(0), CUTSCENE(1), PLAY(2);
 	
 	private int id;
 	

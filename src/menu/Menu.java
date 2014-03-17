@@ -1,5 +1,7 @@
 package menu;
 
+import java.awt.Font;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.newdawn.slick.Color;
@@ -7,17 +9,36 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.state.StateBasedGame;
+import org.newdawn.slick.util.ResourceLoader;
 
 import states.MenuState;
 
 public class Menu extends Option {
 	
-	protected ArrayList<Option> options = new ArrayList<Option>();
-	protected int currentOption = 0;
+	protected TrueTypeFont font;
+	protected ArrayList<Option> options;
+	protected int currentOption;
+	protected Input input;
 	
 	public Menu(String text) {
 		super(text);
+		importFont();
+		options = new ArrayList<Option>();
+		currentOption = 0;
+		input = null;
+	}
+	
+	public void importFont() {
+		try {
+			InputStream inputStream	= ResourceLoader.getResourceAsStream("resources/fonts/Caracteres L1.ttf");
+			Font awtFont = Font.createFont(Font.TRUETYPE_FONT, inputStream);
+			awtFont = awtFont.deriveFont(48f); // set font size
+			font = new TrueTypeFont(awtFont, false);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void addOption(Option o) {
@@ -26,10 +47,10 @@ public class Menu extends Option {
 	
 	public void update(GameContainer container, StateBasedGame sbg, int delta)
 			throws SlickException {
-		Input input = container.getInput();
-		boolean up = input.isKeyPressed(Input.KEY_UP);
-		boolean down = input.isKeyPressed(Input.KEY_DOWN);
-		boolean enter = input.isKeyPressed(Input.KEY_ENTER);
+		input = container.getInput();
+		boolean up = input.isKeyPressed(Input.KEY_UP) || input.isKeyPressed(Input.KEY_RIGHT);
+		boolean down = input.isKeyPressed(Input.KEY_DOWN) || input.isKeyPressed(Input.KEY_LEFT);
+		boolean enter = input.isKeyPressed(Input.KEY_ENTER) || input.isKeyPressed(Input.KEY_SPACE);
 		
 		if(up && down) {}
 		else if(up) {

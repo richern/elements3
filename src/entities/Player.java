@@ -1,4 +1,4 @@
-package world;
+package entities;
 
 import java.util.HashMap;
 
@@ -9,13 +9,9 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.geom.Rectangle;
-import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 
-import enums.GameRole;
 import enums.PlayerState;
-import states.PlayState;
-import util.GlobalInput;
 
 public class Player {
 	
@@ -108,7 +104,7 @@ public class Player {
 		wallingLeft = new Animation(spritesheet, 3, 2, 3, 2, true, animationSpeed, true);
 		wallingRight = new Animation(spritesheet, 1, 1, 1, 1, true, animationSpeed, true);
 	}
-
+	
 	public void update(HashMap<Integer, Boolean> input, float time) {
 		boolean leftKey = input.get(Input.KEY_LEFT);
 		boolean rightKey = input.get(Input.KEY_RIGHT);

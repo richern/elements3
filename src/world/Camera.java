@@ -1,9 +1,8 @@
 package world;
 
-import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
-import org.newdawn.slick.tiled.TiledMap;
 
+import entities.Player;
 import main.Game;
 
 public class Camera {

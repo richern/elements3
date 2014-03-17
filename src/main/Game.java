@@ -9,18 +9,15 @@ import networking.GameServer;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.state.StateBasedGame;
+import org.newdawn.slick.state.transition.FadeInTransition;
+import org.newdawn.slick.state.transition.Transition;
 
-import com.esotericsoftware.kryonet.Client;
-import com.esotericsoftware.kryonet.EndPoint;
 import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.kryonet.Server;
 
 import enums.GameState;
 import states.*;
 import util.Dimension;
-import world.Level;
 
 public class Game extends StateBasedGame {
 	
@@ -34,6 +31,7 @@ public class Game extends StateBasedGame {
 	@Override
 	public void initStatesList(GameContainer container) throws SlickException {
 		addState(new MenuState());
+		addState(new CutsceneState());
 		addState(new PlayState());
 	}
 	
@@ -43,6 +41,18 @@ public class Game extends StateBasedGame {
 	
 	public void startClient(String host) throws IOException {
 		network = new GameClient(host, this);
+	}
+	
+	public void enterMenuState() {
+		enterState(GameState.MENU.getID());
+	}
+	
+	public void enterMenuState(Transition leave, Transition enter) {
+		enterState(GameState.MENU.getID(), leave, enter);
+	}
+	
+	public void enterCutsceneState() {
+		enterState(GameState.CUTSCENE.getID());
 	}
 	
 	public void enterPlayState() {
@@ -72,8 +82,8 @@ public class Game extends StateBasedGame {
 	public static void main(String[] args) throws SlickException {
 		AppGameContainer app = new AppGameContainer(new Game());
 		
-		app.setDisplayMode(640, 360, false);
-		//app.setDisplayMode(1920, 1080, true);
+		//app.setDisplayMode(640, 360, false);
+		app.setDisplayMode(1920, 1080, true);
 		app.setAlwaysRender(true);
 		app.start();
 	}

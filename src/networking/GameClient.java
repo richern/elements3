@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.newdawn.slick.geom.Point;
 
-import states.PlayState;
 import world.World;
 import main.Game;
 import networking.packets.*;
@@ -12,8 +11,6 @@ import networking.packets.*;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-
-import enums.GameRole;
 
 public class GameClient extends Listener {
 	

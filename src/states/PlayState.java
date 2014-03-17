@@ -2,6 +2,7 @@ package states;
 
 import java.util.HashMap;
 	
+
 import main.Game;
 import networking.GameClient;
 import networking.GameServer;
@@ -10,17 +11,15 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
 import com.esotericsoftware.kryonet.Listener;
 
+import entities.Player;
 import enums.GameRole;
 import enums.GameState;
-import util.GlobalInput;
 import world.Level;
-import world.Player;
 import world.World;
 	
 public class PlayState extends BasicGameState {
@@ -88,8 +87,6 @@ public class PlayState extends BasicGameState {
 	@Override
 	public void render(GameContainer container, StateBasedGame sbg, Graphics graphics)
 			throws SlickException {
-		//graphics.scale((float) 640/1920, (float) 360/1080);
-		//graphics.scale((float) container.getScreenWidth() / 1920f, (float) container.getScreenHeight() / 1080f);
 		graphics.scale((float) container.getWidth() / 1920f, (float) container.getHeight() / 1080f);
 		world.render(graphics);
 	}

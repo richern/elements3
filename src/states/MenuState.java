@@ -1,19 +1,14 @@
  package states;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import main.Game;
-import menu.Action;
-import menu.Menu;
-import menu.Option;
-import networking.GameClient;
+import menu.*;
+import menu.menus.*;
 
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
@@ -32,12 +27,13 @@ public class MenuState extends BasicGameState {
 		final Game game = (Game) sbg;
 		final PlayState playState = game.getPlayState();
 		
+		Menu titleMenu = new TitleMenu("title");
 		Menu mainMenu = new Menu("main");
 		
 		Action singlePlayer = new Action("Single Player", new Callable<Void>() {
 			public Void call() {
 				playState.setRole(GameRole.ALL);
-				game.enterPlayState();
+				game.enterCutsceneState();
 				return null;
 			}
 		});
@@ -68,10 +64,12 @@ public class MenuState extends BasicGameState {
 			}
 		});
 		
+		titleMenu.addOption(mainMenu);
+		
 		mainMenu.addOption(singlePlayer);
 		mainMenu.addOption(hostGame);
 		mainMenu.addOption(findGame);
-		rootMenu = mainMenu;
+		rootMenu = titleMenu;
 	}
 	
 	@Override

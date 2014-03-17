@@ -6,6 +6,8 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Point;
 
+import entities.Player;
+
 public class World {
 	
 	// fields
