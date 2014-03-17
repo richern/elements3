@@ -28,9 +28,9 @@ public class Player {
 	private static final float GRAVITY = 1500;
 	private static final float MAX_FALL_SPEED = 1000;
 	
-	private static final float JUMP_SPEED = 600;
+	private static final float JUMP_SPEED = 450;
 	private static final float MIN_JUMP_TIME = 50;
-	private static final float MAX_JUMP_TIME = 250;
+	private static final float MAX_JUMP_TIME = 400;
 	
 	private static final float MAX_WALL_TIME = 500; // time player is stuck to wall when moving in opposite direction
 	private static final float WALL_JUMP_SPEED = MAX_SPEED / 2;
@@ -94,7 +94,7 @@ public class Player {
 		
 		this.positionChanged = false;
 		
-		spritesheet = new SpriteSheet("resources/spritesheets/player.png", SPRITE_WIDTH, SPRITE_HEIGHT);
+		spritesheet = new SpriteSheet("resources/spritesheets/player.png", SPRITE_WIDTH, SPRITE_HEIGHT, 2);
 		idlingLeft = new Animation(spritesheet, 2, 0, 2, 0, true, animationSpeed, true);
 		idlingRight = new Animation(spritesheet, 4, 1, 4, 1, true, animationSpeed, true);
 		walkingLeft = new Animation(spritesheet, 3, 0, 4, 0, true, animationSpeed, true);
@@ -124,9 +124,11 @@ public class Player {
 		positionChanged = false;
 	}
 	
-	public void update(Point playerPosition) {
-		x = playerPosition.getX();
-		y = playerPosition.getY();
+	public void update(float x, float y, float ddx) {
+		positionChanged = true;
+		setX(x);
+		setY(y);
+		this.ddx = ddx;
 	}
 	
 	public void idle(float time) {
@@ -172,10 +174,15 @@ public class Player {
 	
 	public void jump(float time) {
 		if(hasJump && jumpReleased) {
-			if(state.isOnLeftWall())
+			if(state.isOnLeftWall()) {
+				ddx = ACCELERATION;
 				dx = WALL_JUMP_SPEED;
-			else if(state.isOnRightWall())
+			}
+			else if(state.isOnRightWall()) {
+				ddx = -ACCELERATION;				
 				dx = -WALL_JUMP_SPEED;
+			}
+			else ddx = 0;
 			jumpReleased = false;
 			hasJump = false;
 			jumping = true;
@@ -212,12 +219,16 @@ public class Player {
 		if(noCollision)	{
 			if(ddx > 0) 
 				 state = PlayerState.JUMP_RIGHT;
+			else if(ddx < 0)
+				state = PlayerState.JUMP_LEFT;
+			else if(state.isFacingRight())
+				 state = PlayerState.JUMP_RIGHT;
 			else state = PlayerState.JUMP_LEFT;
 		}
 		if(bottomCollision != null) {
-			if(dx > 0)
+			if(ddx > 0)
 				state = PlayerState.WALK_RIGHT;
-			else if(dx < 0)
+			else if(ddx < 0)
 				state = PlayerState.WALK_LEFT;
 			else if(state.isFacingRight())
 				state = PlayerState.IDLE_RIGHT;
@@ -290,8 +301,8 @@ public class Player {
 		return dy;
 	}
 	
-	public Point getPosition() {
-		return new Point(x, y);
+	public float getDdx() {
+		return ddx;
 	}
 	
 	public void setX(float x) {

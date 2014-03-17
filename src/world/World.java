@@ -5,7 +5,10 @@ import java.util.HashMap;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Point;
+import org.newdawn.slick.geom.Rectangle;
 
+import world.Level.TileMapOutOfBoundsException;
+import entities.Key;
 import entities.Player;
 
 public class World {
@@ -13,6 +16,7 @@ public class World {
 	// fields
 	private Level level;
 	private Player player;
+	private Key key;
 	private Camera camera;
 	
 	// util
@@ -23,6 +27,7 @@ public class World {
  	public World(Level level) throws SlickException {
  		this.level = level;
 		this.player = new Player(level.getPlayerSpawn());
+		this.key = new Key(level.getKeySpawn(), level.getKeyType());
 		this.camera = new Camera(level, player);
 		
 		this.tileSize = level.getTileSize();
@@ -30,19 +35,32 @@ public class World {
 		playerHeight = player.getHeight();
 	}
 	
-	public void update(HashMap<Integer, Boolean> input, float time) {
+	public void update(HashMap<Integer, Boolean> input, float time) throws TileMapOutOfBoundsException, KeyException {
 		player.update(input, time);
 		checkCollision(time);
+		checkKey();
 		camera.update();
 	}
 	
-	public void update(Point playerPosition) {
-		player.update(playerPosition);
+	public void update(float x, float y, float ddx) {
+		player.update(x, y, ddx);
 		camera.update();
+	}
+	
+	public void reset() {
+		float x = level.getPlayerSpawn().getX();
+		float y = level.getPlayerSpawn().getY();
+		
+		player.setX(x);
+		player.setY(y);
 	}
 	
 	public void update(float time) {
-		checkCollision(time);
+		try {
+			checkCollision(time);
+		} catch(TileMapOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 		camera.update();
 	}
 	 
@@ -50,13 +68,21 @@ public class World {
 		int offsetX = camera.getOffsetX();
 		int offsetY = camera.getOffsetY();
 		
-		level.render(offsetX, offsetY);
+		level.render(graphics, offsetX, offsetY);
 		graphics.translate(offsetX, offsetY);
 		player.render(graphics);
-		graphics.draw(player.getRectangle());
+		key.render(graphics);
 	}
 	
-	public void checkCollision(float time) {
+	public void checkKey() throws KeyException {
+		Rectangle playerRectangle = player.getRectangle();
+		Rectangle keyRectangle = key.getRectangle();
+		if(playerRectangle.intersects(keyRectangle)) {
+			throw new KeyException();
+		}
+	}
+	
+	public void checkCollision(float time) throws TileMapOutOfBoundsException {
 		float velocityX = player.getDx();
 		float velocityY = player.getDy();
 		float oldX 		= player.getX();
@@ -100,7 +126,7 @@ public class World {
 		player.updateState(leftCollision, rightCollision, bottomCollision, topCollision);
 	}
 	
-	private Float leftCollision(float newX, float oldY) {
+	private Float leftCollision(float newX, float oldY) throws TileMapOutOfBoundsException {
 		float leftX = newX - playerWidth / 2 - 2;
 		float topY = oldY - playerHeight / 2;
 		float bottomY = oldY + playerHeight / 2;
@@ -119,7 +145,7 @@ public class World {
 		}
 	}
 	
-	private Float rightCollision(float newX, float oldY) {
+	private Float rightCollision(float newX, float oldY) throws TileMapOutOfBoundsException {
 		float rightX = newX + playerWidth / 2;
 		float topY = oldY - playerHeight / 2;
 		float bottomY = oldY + playerHeight / 2;
@@ -138,7 +164,7 @@ public class World {
 		}
 	}
 	
-	private Float bottomCollision(float oldX, float newY, float time) {
+	private Float bottomCollision(float oldX, float newY, float time) throws TileMapOutOfBoundsException {
 		float leftX = oldX - playerWidth / 2;
 		float rightX = oldX + playerWidth / 2 - 1;
 		float bottomY = newY + playerHeight / 2 + 1;
@@ -157,7 +183,7 @@ public class World {
 		}
 	}
 	
-	private Float topCollision(float oldX, float newY) {
+	private Float topCollision(float oldX, float newY) throws TileMapOutOfBoundsException {
 		float leftX = oldX - playerWidth / 2;
 		float rightX = oldX + playerWidth / 2 - 1;
 		float topY = newY - playerHeight / 2;
@@ -178,6 +204,12 @@ public class World {
 	
 	public Player getPlayer() {
 		return player;
+	}
+	
+	public class KeyException extends Exception {
+		public KeyException() {
+			super("Found key");
+		}
 	}
 	
 }

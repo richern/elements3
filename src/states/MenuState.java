@@ -27,7 +27,7 @@ public class MenuState extends BasicGameState {
 		final Game game = (Game) sbg;
 		final PlayState playState = game.getPlayState();
 		
-		Menu titleMenu = new TitleMenu("title");
+		Menu titleMenu = new TitleMenu();
 		Menu mainMenu = new Menu("main");
 		
 		Action singlePlayer = new Action("Single Player", new Callable<Void>() {
@@ -43,11 +43,10 @@ public class MenuState extends BasicGameState {
 				try {
 					playState.setRole(GameRole.JUMP);
 					game.startServer();
-					game.enterPlayState();
+					game.enterCutsceneState();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				System.out.println("Hosting game");
 				return null;
 			}
 		});
@@ -56,10 +55,10 @@ public class MenuState extends BasicGameState {
 			public Void call() {
 				try {
 					game.startClient("localhost");
+					game.enterCutsceneState();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				System.out.println("Joining game");
 				return null;
 			}
 		});
@@ -86,6 +85,7 @@ public class MenuState extends BasicGameState {
 	@Override
 	public void render(GameContainer container, StateBasedGame sbg, Graphics graphics)
 			throws SlickException {
+		graphics.scale((float) container.getWidth() / 1920f, (float) container.getHeight() / 1080f);
 		currentMenu.render(container, sbg, graphics);
 	}
 	

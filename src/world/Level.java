@@ -1,51 +1,68 @@
 package world;
 
+import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Point;
 import org.newdawn.slick.tiled.TiledMap;
 
-public class Level extends TiledMap {
+import enums.KeyType;
+
+public class Level {
 	
-	int id;
 	String name;
+	TiledMap collisionMap;
+	TiledMap artMap;
+	Image background;
 	
 	int tileSize;
 	Point playerSpawn;
+	Point keySpawn;
+	KeyType keyType;
 	
-	public Level(int id, String name, String map) throws SlickException, TileNotSquareException {
-		super(map);
+	public Level(String name, String collisionMap, String artMap, String background,
+			Point playerSpawn, Point keySpawn, KeyType keyType) throws SlickException{
+		this.collisionMap = new TiledMap(collisionMap);
+		this.artMap = new TiledMap(artMap);
+		this.background = new Image(background);
 		
-		if(getTileWidth() == getTileHeight())
-			 tileSize = getTileWidth();
-		else throw new TileNotSquareException();
+		System.out.println(this.collisionMap.getHeight() * this.collisionMap.getTileHeight());
+		System.out.println(this.artMap.getHeight() * this.artMap.getTileHeight());
 		
-		this.id = id;
+		this.tileSize = this.collisionMap.getTileWidth();
 		this.name = name;
-		this.playerSpawn = findPlayerSpawn(); 
-	}
-	
-	// construct	
-	public Point findPlayerSpawn() {
-		return null;
+		this.playerSpawn = playerSpawn;
+		this.keySpawn = keySpawn;
+		this.keyType = keyType;
 	}
 	
 	// util
-	public boolean isBlocked(Point point) {
+	public boolean isBlocked(Point point) throws TileMapOutOfBoundsException {
 		int x = (int) (point.getX() / tileSize);
 		int y = (int) (point.getY() / tileSize);
-		int tileId = getTileId(x, y, 0);
-		boolean isBlocked = getTileProperty(tileId, "blocked", "false").equals("true");
-		return isBlocked;
+		try {
+			int tileId = collisionMap.getTileId(x, y, 0);
+			boolean isBlocked = collisionMap.getTileProperty(tileId, "blocked", "false").equals("true");
+			return isBlocked;
+		} catch(java.lang.ArrayIndexOutOfBoundsException e) {
+			throw new TileMapOutOfBoundsException(x, y);
+		}
 	}
 	
 	// slick
-	public void render(int offsetX, int offsetY) {
-		super.render(offsetX, offsetY);
+	public void render(Graphics graphics, int offsetX, int offsetY) {
+		graphics.drawImage(background, 0, 0);
+		artMap.render(offsetX, offsetY, 1);
+		artMap.render(offsetX, offsetY, 2);
 	}
 	
 	// primitive getters/setters
-	public int getId() {
-		return id;
+	public int getWidth() {
+		return artMap.getWidth();
+	}
+	
+	public int getHeight() {
+		return artMap.getHeight();
 	}
 	
 	public int getTileSize() {
@@ -53,14 +70,21 @@ public class Level extends TiledMap {
 	}
 	
 	public Point getPlayerSpawn() {
-		//TODO:return playerSpawn;
-		return new Point(6.5f*tileSize, 15.5f*tileSize);
+		return playerSpawn;
 	}
 	
-	@SuppressWarnings("serial")
-	public class TileNotSquareException extends Exception {
-		public TileNotSquareException() {
-			super("Tile height does not equal tile width");
+	public Point getKeySpawn() {
+		return keySpawn;
+	}
+	
+	public KeyType getKeyType() {
+		return keyType;
+	}
+	
+	public class TileMapOutOfBoundsException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public TileMapOutOfBoundsException(int x, int y) {
+			super("Out of bounds at " + x + ":" + y);
 		}
 	}
 		

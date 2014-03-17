@@ -13,10 +13,12 @@ public class Network {
 	
 	public static void register(EndPoint endPoint) {
 		Kryo kryo = endPoint.getKryo();
+		
 		kryo.register(GameRole.class);
 		kryo.register(GameInitPacket.class);
 		kryo.register(ActionPacket.class);
 		kryo.register(PlayerPacket.class);
+		kryo.register(NextLevelPacket.class);
 	}
 
 }

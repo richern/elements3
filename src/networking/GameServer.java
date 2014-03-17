@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.newdawn.slick.state.GameState;
+
 import states.PlayState;
 import main.Game;
 import networking.packets.*;
@@ -33,7 +35,7 @@ public class GameServer extends Listener {
 	}
 	
 	public void connect() throws IOException {
-		server.bind(PORT);
+		server.bind(PORT, PORT);
 		Network.register(server);
 		server.addListener(this);
 		server.start();
@@ -52,11 +54,7 @@ public class GameServer extends Listener {
 	public void connected(Connection connection) {
 		GameRole role = roles.remove(0);
 		int connectionId = connection.getID();
-			
 		rolesToConnections.put(connectionId, role);
-		GameInitPacket gameInitPacket = new GameInitPacket();
-		connection.sendTCP(gameInitPacket);
-		sendPlayerPacket();
 	}
 	
 	public void received(Connection connection, Object packet) {
@@ -66,25 +64,29 @@ public class GameServer extends Listener {
 		if(packet instanceof ActionPacket) {
 			System.out.println("received action packet from " + connectionId);
 			GameRole role = rolesToConnections.get(connectionId);
-			
 			playState.translateAction(role);
 		}
 	}
 	
 	public void disconnected(Connection connection) {
-		
 		System.out.println("Disconnected: " + connection.getID());
 	}
 	
 	public void sendPlayerPacket() {
 		Player player = game.getPlayState().getWorld().getPlayer();
-		float x = player.getPosition().getX();
-		float y = player.getPosition().getY();
+		float x = player.getX();
+		float y = player.getY();
+		float ddx = player.getDdx();
 		
 		PlayerPacket playerPacket = new PlayerPacket();
 		playerPacket.x = x;
 		playerPacket.y = y;
-		server.sendToAllTCP(playerPacket);
+		playerPacket.ddx = ddx;
+ 		server.sendToAllTCP(playerPacket);
 	}
-
+	
+	public void sendNextLevelPacket() {
+		NextLevelPacket packet = new NextLevelPacket();
+		server.sendToAllTCP(packet);
+	}
 }

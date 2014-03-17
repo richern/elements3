@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="35" height="35" tilewidth="96" tileheight="96">
+ <tileset firstgid="1" source="../tilesets/ground96.tsx"/>
+ <tileset firstgid="2" name="firerock" tilewidth="32" tileheight="32">
+  <image source="../tiles/med/firerock.png" width="160" height="160"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="35" height="35">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+2Wyw4AEAwE+f+fdhf1StglM4kLh452D00JVOTgqFxm7m7g5lLXVrm0uOUyk1PygkuEg4tTdnv1cFl/OwEu6/XULspdymkvgDbRzs3sztPrPf335beZjXI4+tur/4Y9CgQKw+MkEwAA
+  </data>
+ </layer>
+</map>

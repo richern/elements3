@@ -38,8 +38,8 @@ public class Camera {
 	}
 		
 	public void setCenter() {
-		float playerX = player.getPosition().getX();
-		float playerY = player.getPosition().getY();
+		float playerX = player.getX();
+		float playerY = player.getY();
 		
 		camX = playerX - CAM_WIDTH / 2;
 		camY = playerY - CAM_HEIGHT / 2;

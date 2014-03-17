@@ -40,7 +40,7 @@ public class Game extends StateBasedGame {
 	}
 	
 	public void startClient(String host) throws IOException {
-		network = new GameClient(host, this);
+		network = new GameClient(this);
 	}
 	
 	public void enterMenuState() {
@@ -51,8 +51,13 @@ public class Game extends StateBasedGame {
 		enterState(GameState.MENU.getID(), leave, enter);
 	}
 	
+
 	public void enterCutsceneState() {
 		enterState(GameState.CUTSCENE.getID());
+	}
+	
+	public CutsceneState getCutsceneState() {
+		return (CutsceneState) getState(GameState.CUTSCENE.getID());
 	}
 	
 	public void enterPlayState() {

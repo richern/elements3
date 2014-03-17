@@ -4,6 +4,8 @@ import java.awt.Font;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import main.Game;
+
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -66,17 +68,23 @@ public class Menu extends Option {
 	
 	public void render(GameContainer container, StateBasedGame sbg, Graphics graphics)
 			throws SlickException {
-		int x = 30;
-		int y = 30;
+		float width = Game.TARGET_RESOLUTION.getWidth();
+		float height = Game.TARGET_RESOLUTION.getHeight();
+		float centerX = width / 2;
+		float x;
+		float y = height * 0.3f;
 		
 		for(int i=0; i < options.size(); i++) {
-			graphics.setColor(Color.white);
 			String text = options.get(i).getText();
+			x = centerX - font.getWidth(text) / 2;
 			if(i == currentOption) {
-				graphics.setColor(Color.yellow);
+				font.drawString(x, y, text, Color.yellow);
 			}
-			graphics.drawString(text, x, y);
-			y += 30;
+			else {
+				font.drawString(x, y, text, Color.white);	
+			}
+			
+			y += 60;
 		}
 		graphics.setColor(Color.white);
 	}
