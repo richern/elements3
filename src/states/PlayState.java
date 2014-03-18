@@ -35,16 +35,15 @@ public class PlayState extends BasicGameState {
 	HashMap<Integer, Boolean> playerInput;
 	HashMap<Integer, Boolean> globalInput;
 	
-	boolean keyPressed = false;
+	boolean keyChanged = false;
 
 	@Override
 	public void init(GameContainer container, StateBasedGame sbg)
 			throws SlickException {
 		levels = new ArrayList<Level>();
-		levels.add(new Level("96", "resources/tilemaps/airCMap.tmx", 
-				"resources/tilemaps/airAMap.tmx", 
+		levels.add(new Level("air", "resources/tilemaps/airCMap2.tmx", 
+				"resources/tilemaps/airAMap2.tmx", 
 				"resources/backgrounds/Air.png",
-				//new Point(23.5f * 96, 5.5f * 96),
 				new Point(1.5f * 96, 29.5f * 96),
 				new Point(21.5f * 96, 6.5f * 96), KeyType.AIR));
 
@@ -63,9 +62,9 @@ public class PlayState extends BasicGameState {
 		float time = delta / 1000.0f;
 		
 		if(game.isHost()) {
-			boolean spaceKey = playerInput.get(Input.KEY_SPACE);
+			Boolean spaceKey = playerInput.get(Input.KEY_SPACE);
 						
-			if(spaceKey) translateAction(role);
+			if(spaceKey != null) translateAction(role, spaceKey);
 			try {
 				world.update(globalInput, time);
 			} catch(Exception e) {
@@ -80,10 +79,10 @@ public class PlayState extends BasicGameState {
 			((GameServer) network).sendPlayerPacket();
 		}
 		else if(game.isClient()) {
-			boolean spaceKey = playerInput.get(Input.KEY_SPACE);
+			Boolean spaceKey = playerInput.get(Input.KEY_SPACE);
 			
-			if(spaceKey) {
-				((GameClient) network).sendActionPacket();
+			if(spaceKey != null) {
+				((GameClient) network).sendActionPacket(spaceKey);
 			}
 			
 			world.update(time);
@@ -118,7 +117,7 @@ public class PlayState extends BasicGameState {
 	
 	@Override
 	public void keyPressed(int key, char c) {
-		keyPressed = true;
+		keyChanged = true;
 		if(playerInput.containsKey(key)) {
 			playerInput.put(key, true); 
 		}
@@ -126,9 +125,9 @@ public class PlayState extends BasicGameState {
 	
 	@Override
 	public void keyReleased(int key, char c) {
-		if(!keyPressed) return;
+		keyChanged = true;
 		if(playerInput.containsKey(key)) {
-			playerInput.put(key, true); 
+			playerInput.put(key, false); 
 		}
 	}
 	
@@ -138,7 +137,6 @@ public class PlayState extends BasicGameState {
 	}
 	
 	public void nextLevel(Game game) throws SlickException {
-		keyPressed = false;
 		if(currentLevel >= levels.size() - 1) {
 			game.getCutsceneState().activateCutscene("ending");
 			game.enterCutsceneState();
@@ -149,21 +147,21 @@ public class PlayState extends BasicGameState {
 	}
 	
 	public void resetWorld() throws SlickException {
-		keyPressed = false;
 		world = new World(levels.get(currentLevel));
 	}
 	
 	@SuppressWarnings("incomplete-switch")
-	public void translateAction(GameRole role) {
+	public void translateAction(GameRole role, boolean pressed) {
+		//System.out.println(role.toString() + " " + pressed);
 		switch(role){
 		case LEFT:
-			globalInput.put(Input.KEY_LEFT, true);
+			globalInput.put(Input.KEY_LEFT, pressed);
 			break;
 		case RIGHT:
-			globalInput.put(Input.KEY_RIGHT, true);
+			globalInput.put(Input.KEY_RIGHT, pressed);
 			break;
 		case JUMP:
-			globalInput.put(Input.KEY_UP, true);
+			globalInput.put(Input.KEY_UP, pressed);
 			break;
 		}
 	}
@@ -178,11 +176,9 @@ public class PlayState extends BasicGameState {
 	
 	public void resetInput() {
 		for(Integer key : playerInput.keySet()) {
-			playerInput.put(key, false);
+			playerInput.put(key, null);
 		}
-		for(Integer key : globalInput.keySet()) {
-			globalInput.put(key, false);
-		}
+		keyChanged = false;
 	}
 	
 	public void setRole(GameRole role) {

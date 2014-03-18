@@ -4,7 +4,9 @@ import java.util.HashMap;
 
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.PackedSpriteSheet;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Point;
@@ -37,7 +39,7 @@ public class Player {
 	private static final float WALL_GRAVITY = GRAVITY / 3;
 	private static final float WALL_SLIDE_SPEED = MAX_FALL_SPEED / 5;
 	
-	private static final int animationSpeed = 50;
+	private static final int animationSpeed = 100;
 	
 	private float x;
 	private float y;
@@ -64,7 +66,7 @@ public class Player {
 	Float bottomCollision;
 	Float topCollision;
 	
-	SpriteSheet spritesheet;
+	PackedSpriteSheet spritesheet;
 	Animation idlingLeft;
 	Animation idlingRight;
 	Animation walkingLeft;
@@ -94,25 +96,41 @@ public class Player {
 		
 		this.positionChanged = false;
 		
-		spritesheet = new SpriteSheet("resources/spritesheets/player.png", SPRITE_WIDTH, SPRITE_HEIGHT, 2);
-		idlingLeft = new Animation(spritesheet, 2, 0, 2, 0, true, animationSpeed, true);
-		idlingRight = new Animation(spritesheet, 4, 1, 4, 1, true, animationSpeed, true);
-		walkingLeft = new Animation(spritesheet, 3, 0, 4, 0, true, animationSpeed, true);
-		walkingRight = new Animation(spritesheet, 0, 2, 2, 2, true, animationSpeed, true);
-		jumpingLeft = new Animation(spritesheet, 1, 0, 1, 0, true, animationSpeed, true);
-		jumpingRight = new Animation(spritesheet, 3, 1, 3, 1, true, animationSpeed, true);
-		wallingLeft = new Animation(spritesheet, 3, 2, 3, 2, true, animationSpeed, true);
-		wallingRight = new Animation(spritesheet, 1, 1, 1, 1, true, animationSpeed, true);
+		spritesheet = new PackedSpriteSheet("resources/spritesheets/Character.def");
+		Image leftJump 		= spritesheet.getSprite("left-jump2.png");
+		Image rightJump 	= spritesheet.getSprite("right-jump2.png");
+		Image leftWalk0 	= spritesheet.getSprite("left-walk0.png");
+		Image leftWalk1 	= spritesheet.getSprite("left-walk1.png");
+		Image leftWalk2 	= spritesheet.getSprite("left-walk2.png");
+		Image leftWall 		= spritesheet.getSprite("right-wall.png");
+		Image rightWall 	= spritesheet.getSprite("left-wall.png");
+		Image leftRest		= spritesheet.getSprite("left-rest.png");
+		Image rightRest 	= spritesheet.getSprite("right-rest.png");
+		Image rightWalk0	= spritesheet.getSprite("right-walk0.png");
+		Image rightWalk1	= spritesheet.getSprite("right-walk1.png");
+		Image rightWalk2	= spritesheet.getSprite("right-walk2.png");
+		
+		idlingLeft 		= new Animation(new Image[] { leftRest 	}, animationSpeed);
+		idlingRight 	= new Animation(new Image[] { rightRest }, animationSpeed);
+		walkingLeft		= new Animation(new Image[] { leftWalk0, leftWalk1, leftWalk2 }, animationSpeed);
+		walkingRight	= new Animation(new Image[] { rightWalk0, rightWalk1, rightWalk2 }, animationSpeed);
+		jumpingLeft		= new Animation(new Image[] { leftJump 	}, animationSpeed);
+		jumpingRight	= new Animation(new Image[] { rightJump }, animationSpeed);
+		wallingLeft		= new Animation(new Image[] { leftWall 	}, animationSpeed);
+		wallingRight	= new Animation(new Image[] { rightWall }, animationSpeed);
+		
+		walkingLeft.setPingPong(true);
+		walkingRight.setPingPong(true);
 	}
 	
 	public void update(HashMap<Integer, Boolean> input, float time) {
-		boolean leftKey = input.get(Input.KEY_LEFT);
-		boolean rightKey = input.get(Input.KEY_RIGHT);
-		boolean upKey = input.get(Input.KEY_UP);
+		Boolean leftKey = input.get(Input.KEY_LEFT);
+		Boolean rightKey = input.get(Input.KEY_RIGHT);
+		Boolean upKey = input.get(Input.KEY_UP);
 		
-		left = left ^ leftKey;
-		right = right ^ rightKey;
-		up = up ^ upKey;
+		if(leftKey != null)  left  = leftKey;
+		if(rightKey != null) right = rightKey;
+		if(upKey != null)    up	   = upKey;
 		
 		if(left && right || !left && !right) idle(time);
 		if(left) 	moveLeft(time);

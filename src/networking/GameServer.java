@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.newdawn.slick.state.GameState;
-
 import states.PlayState;
 import main.Game;
 import networking.packets.*;
@@ -62,9 +60,9 @@ public class GameServer extends Listener {
 		int connectionId = connection.getID();
 		
 		if(packet instanceof ActionPacket) {
-			System.out.println("received action packet from " + connectionId);
 			GameRole role = rolesToConnections.get(connectionId);
-			playState.translateAction(role);
+			boolean pressed = ((ActionPacket) packet).pressed;
+			playState.translateAction(role, pressed);
 		}
 	}
 	

@@ -21,7 +21,7 @@ import enums.GameState;
 public class CutsceneState extends BasicGameState {
 	
 	final int FADE_TIME = 1000;
-	final int MIN_SCENE_TIME = 2000;
+	final int MIN_SCENE_TIME = 000;
 	
 	HashMap<String, ArrayList<Image>> cutscenes;
 	ArrayList<Image> activeCutscene;

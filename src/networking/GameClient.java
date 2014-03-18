@@ -23,7 +23,8 @@ public class GameClient extends Listener {
 		this.game = game;
 		client = new Client();
 		InetAddress address = client.discoverHost(Network.PORT, Network.PORT);
-		this.host = address.toString().replace("/", "");
+		//this.host = address.toString().replace("/", "");
+		this.host = "localhost";
 		connect();
 	}
 	
@@ -54,8 +55,10 @@ public class GameClient extends Listener {
 		}
 	}
 	
-	public void sendActionPacket() {
-		client.sendTCP(new ActionPacket());
+	public void sendActionPacket(boolean pressed) {
+		ActionPacket packet = new ActionPacket();
+		packet.pressed = pressed;
+		client.sendTCP(packet);
 	}
 
 }
